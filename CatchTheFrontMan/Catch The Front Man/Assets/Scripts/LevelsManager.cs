@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LevelsManager : MonoBehaviour
 {
     public List<LevelUI> levels = new List<LevelUI>();
 
-    public void Awake()
+    public void Start()
     {
         foreach (LevelUI level in levels)
         {
