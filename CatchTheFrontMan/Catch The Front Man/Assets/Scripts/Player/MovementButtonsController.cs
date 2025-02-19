@@ -3,20 +3,26 @@ using UnityEngine.UI;
 
 public class MovementButtonsController : MonoBehaviour
 {
-    [SerializeField] private PlayerMovement playerMovement;
+    [SerializeField] private PlayerController playerController;
 
     public void OnLeftButtonPressed()
     {
-        playerMovement.CastRay(Vector3.left);
+        playerController.OnLeftButtonClicked();
     }
 
     public void OnRightButtonPressed()
     {
-        playerMovement.CastRay(Vector3.right);
+        playerController.OnRightButtonClicked();
     }
 
     public void OnDownButtonPressed()
     {
-        playerMovement.CastRay(Vector3.down);
+        playerController.OnDownButtonClicked();
+    }
+
+
+    public void OnUpButtonPressed()
+    {
+        playerController.OnUpButtonClicked();
     }
 }

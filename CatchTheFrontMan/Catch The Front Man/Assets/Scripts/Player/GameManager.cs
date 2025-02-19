@@ -3,7 +3,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private CameraMovement cameraController; // —сылка на контроллер камеры
-    [SerializeField] private PlayerMovement playerController; // —сылка на контроллер игрока
+    [SerializeField] private PlayerController playerController; // —сылка на контроллер игрока
 
     private void Start()
     {
