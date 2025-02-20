@@ -8,9 +8,11 @@ public class PlayerController : MonoBehaviour
     public float roomWidth = 8f;
     public LayerMask interactableLayer;
 
-    public float moveSpeed = 10;
+    public float moveSpeed = 5f;
 
     public Vector3 targetPosition;
+    
+    public PlayerAnimationManager animManager;
 
     public PlayerMovementState currentState;
     public Dictionary<PlayerMovementState, PlayerMovementState> antiPairs = 
@@ -23,14 +25,17 @@ public class PlayerController : MonoBehaviour
 
     public bool isMoving = false;
     public bool isStopped = true;
-
+    public bool isMovementBlocked = true;
 
     private void Update()
     {
+        if (isMovementBlocked) return;
         if (!isStopped)
         {
 
             // Движение вперед
+
+            animManager.ChangeAnimation("Crouch Walk");
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
             isStopped = false;
         }
@@ -50,7 +55,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-        Debug.Log(currentState);
+
     }
 
     public enum PlayerMovementState
@@ -69,60 +74,85 @@ public class PlayerController : MonoBehaviour
 
     public void OnLeftButtonClicked()
     {
+        if (isMovementBlocked) return;
         if (currentState == antiPairs[PlayerMovementState.left])
         {
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
             currentState = PlayerMovementState.center;
+            transform.rotation = Quaternion.Euler(0,0,0);
 
+            animManager.ChangeAnimation("Crouch Walk");
             isMoving = true;
             isStopped = true;
         }
-        else if (currentState != PlayerMovementState.left)
-        {
+        else 
+            if (currentState != PlayerMovementState.left)
+            {
+                if (CastRay(Vector3.left))
+                {
+                    CastRay(Vector3.left);
+                    currentState = PlayerMovementState.left;
 
-            CastRay(Vector3.left);
-            currentState = PlayerMovementState.left;
+                    transform.rotation = Quaternion.Euler(0, 90, 0);
+                    animManager.ChangeAnimation("Wall Lean");
 
-            isStopped = true;
-            isMoving = true;
+                    isStopped = true;
+                    isMoving = true;
+                }
+            }
         }
-    }
 
     public void OnRightButtonClicked()
     {
+        if (isMovementBlocked) return;
         if (currentState == antiPairs[PlayerMovementState.right])
         {
 
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
             currentState = PlayerMovementState.center;
 
+            animManager.ChangeAnimation("Crouch Walk");
+            transform.rotation = Quaternion.Euler(0, 0, 0);
             isMoving = true;
             isStopped = true;
         }
         else if (currentState != PlayerMovementState.right)
         {
+            if (CastRay(Vector3.right))
+            {
+                transform.rotation = Quaternion.Euler(0, -90, 0);
+                animManager.ChangeAnimation("Wall Lean");
 
-            CastRay(Vector3.right);
-            currentState = PlayerMovementState.right;
-            isStopped = true;
-            isMoving = true;
+                currentState = PlayerMovementState.right;
+                isStopped = true;
+                isMoving = true;
+            }
         }
     }
 
     public void OnDownButtonClicked()
     {
+        if (isMovementBlocked) return;
         if (currentState == PlayerMovementState.down)
         {
 
+            animManager.ChangeAnimation("Crouch Walk");
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
+
+            transform.rotation = Quaternion.Euler(0, 0, 0);
             currentState = PlayerMovementState.center;
             isMoving = false;
             isStopped = false;
         }
         else if (currentState != PlayerMovementState.down)
         {
+
+            targetPosition = new Vector3(0, transform.position.y, transform.position.z);
+
+            transform.rotation = Quaternion.Euler(0, 0, 0);
+            animManager.ChangeAnimation("Floor Lie");
             isStopped = true;
-            isMoving = false;
+            isMoving = true;
             currentState = PlayerMovementState.down;
         }
     }
@@ -130,19 +160,22 @@ public class PlayerController : MonoBehaviour
 
     public void StartMovingForward()
     {
+        isMovementBlocked = false;
         isMoving = false;
         isStopped = false;
         currentState = PlayerMovementState.center;
     }
     // Метод для кастования луча в указанном направлении
-    public void CastRay(Vector3 direction)
+    public bool CastRay(Vector3 direction)
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position, direction, out hit, roomWidth, interactableLayer))
         {
             // Устанавливаем целевую позицию
             targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
+            return true;
         }
-
+        else
+            return false;
     }
 }

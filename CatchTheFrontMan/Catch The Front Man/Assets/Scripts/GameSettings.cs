@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 public class GameSettings : MonoBehaviour
 {
     public static GameSettings Instance;
+    public GameController gameController;
+
     public int currentLevel = 0;
     public int completedLevels = 1;
     private void Awake()
@@ -29,6 +31,10 @@ public class GameSettings : MonoBehaviour
         SaveSettings(); // Сохранение настроек при выходе из игры
     }
 
+    public void AddToCompletedLevels(int level)
+    {
+        completedLevels = level <= completedLevels ? level : completedLevels;
+    }
 
     public void LoadLevelScene(int level)
     {

@@ -4,7 +4,7 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private CameraMovement cameraController; // Ссылка на контроллер камеры
     [SerializeField] private PlayerController playerController; // Ссылка на контроллер игрока
-
+    
     private void Start()
     {
         // Подписываемся на событие достижения конечной точки камерой
