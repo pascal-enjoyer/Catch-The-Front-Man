@@ -18,6 +18,7 @@ public class EnemyVision : MonoBehaviour
 
     private bool playerVisible = false;
 
+    public bool GizmosOn = true;
     void Update()
     {
         CheckPlayerVisibility();
@@ -58,6 +59,7 @@ public class EnemyVision : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        if (!GizmosOn) return;
         Gizmos.color = Color.white;
         Gizmos.DrawWireSphere(transform.position, viewRadius);
 

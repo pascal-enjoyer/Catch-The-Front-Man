@@ -8,7 +8,8 @@ public class PlayerController : MonoBehaviour
     public float roomWidth = 8f;
     public LayerMask interactableLayer;
 
-    public float moveSpeed = 5f;
+    public float moveSpeed = 3f;
+    public float sideSpeed = 10f;
 
     public Vector3 targetPosition;
     
@@ -43,7 +44,7 @@ public class PlayerController : MonoBehaviour
         {
             // ѕлавное перемещение к целевой позиции
             transform.position = Vector3.MoveTowards(transform.position,
-                new Vector3(targetPosition.x, transform.position.y, transform.position.z), moveSpeed * Time.deltaTime);
+                new Vector3(targetPosition.x, transform.position.y, transform.position.z), sideSpeed * Time.deltaTime);
 
             // ≈сли игрок достиг целевой позиции, обновл€ем состо€ние
             if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
