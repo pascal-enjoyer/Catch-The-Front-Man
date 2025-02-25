@@ -16,25 +16,26 @@ public class Waypoint
 
 public class EnemyPatrol : MonoBehaviour
 {
-    public Waypoint[] waypoints; // Массив точек патрулирования
-    public float moveSpeed = 3f; // Скорость движения
-    public float rotationSpeed = 5f; // Скорость поворота
+    public Waypoint[] waypoints;
+    public float moveSpeed = 3f;
+    public float rotationSpeed = 5f;
+    public PatrolType patrolType = PatrolType.PingPong;
+    public bool GizmosOn = true;
+    public PlayerAnimationManager animator;
 
-    private int currentWaypointIndex = 0; // Текущая точка
-    private Vector3 targetPosition; // Целевая позиция
-    private bool isWaiting = false; // Ожидает ли враг
-    private float waitTimer = 0f; // Таймер ожидания
-    private Quaternion targetRotation; // Целевое вращение
-
-    private bool isMovingForward = true; // Флаг направления движения
+    private int currentWaypointIndex = 0;
+    private Vector3 targetPosition;
+    private bool isWaiting = false;
+    private float waitTimer = 0f;
+    private Quaternion targetRotation;
+    private bool isMovingForward = true;
+    private EnemyVision enemyVision;
 
     public enum PatrolType { Loop, PingPong }
-    public PatrolType patrolType = PatrolType.PingPong;
-
-    public bool GizmosOn = true;
 
     void Start()
     {
+        enemyVision = GetComponent<EnemyVision>();
         if (waypoints.Length > 0)
         {
             if (waypoints[currentWaypointIndex] != null)
@@ -44,6 +45,16 @@ public class EnemyPatrol : MonoBehaviour
 
     void Update()
     {
+        if (enemyVision != null && enemyVision.IsPlayerVisible)
+        {
+            // При обнаружении игрока сбрасываем таймер ожидания
+            if (isWaiting)
+            {
+                waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
+            }
+            return;
+        }
+
         if (waypoints.Length == 0) return;
 
         if (isWaiting)
@@ -65,10 +76,15 @@ public class EnemyPatrol : MonoBehaviour
             moveSpeed * Time.deltaTime
         );
 
+        if (enemyVision == null || !enemyVision.IsPlayerVisible)
+            animator.ChangeAnimation("Walk");
+
         if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
         {
             if (waypoints[currentWaypointIndex].GetWaitTime() > 0)
             {
+                if (enemyVision == null || !enemyVision.IsPlayerVisible)
+                    animator.ChangeAnimation("Idle");
                 StartWaiting();
             }
             else
@@ -83,7 +99,6 @@ public class EnemyPatrol : MonoBehaviour
         isWaiting = true;
         waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
 
-        // Устанавливаем цель для поворота
         if (waypoints[currentWaypointIndex].lookTarget != null)
         {
             Vector3 lookDirection = waypoints[currentWaypointIndex].lookTarget.position - transform.position;
@@ -91,13 +106,19 @@ public class EnemyPatrol : MonoBehaviour
         }
         else
         {
-            // Если цель не указана, сохраняем текущее вращение
             targetRotation = transform.rotation;
         }
     }
 
     void HandleWaiting()
     {
+        // Добавляем проверку на видимость игрока
+        if (enemyVision != null && enemyVision.IsPlayerVisible)
+        {
+            waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
+            return;
+        }
+
         waitTimer -= Time.deltaTime;
         RotateDuringWait();
 
@@ -107,39 +128,24 @@ public class EnemyPatrol : MonoBehaviour
             SetNextWaypoint();
         }
     }
-
     void SetNextWaypoint()
     {
         if (waypoints.Length <= 1) return;
+
         if (patrolType == PatrolType.PingPong)
         {
-            // Определяем следующую точку с учетом "туда-обратно"
             if (isMovingForward)
             {
-                if (currentWaypointIndex < waypoints.Length - 1)
-                {
-                    currentWaypointIndex++;
-                }
-                else
-                {
-                    isMovingForward = false;
-                    currentWaypointIndex--;
-                }
+                currentWaypointIndex = (currentWaypointIndex < waypoints.Length - 1) ? currentWaypointIndex + 1 : currentWaypointIndex - 1;
+                isMovingForward = currentWaypointIndex < waypoints.Length - 1;
             }
             else
             {
-                if (currentWaypointIndex > 0)
-                {
-                    currentWaypointIndex--;
-                }
-                else
-                {
-                    isMovingForward = true;
-                    currentWaypointIndex++;
-                }
+                currentWaypointIndex = (currentWaypointIndex > 0) ? currentWaypointIndex - 1 : currentWaypointIndex + 1;
+                isMovingForward = currentWaypointIndex == 0;
             }
         }
-        else if (patrolType == PatrolType.Loop)
+        else
         {
             currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
         }
@@ -169,7 +175,7 @@ public class EnemyPatrol : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        if (waypoints == null || waypoints.Length == 0 || !GizmosOn) return;
+        if (!GizmosOn || waypoints == null || waypoints.Length == 0) return;
 
         Gizmos.color = Color.blue;
         for (int i = 0; i < waypoints.Length; i++)
@@ -177,18 +183,8 @@ public class EnemyPatrol : MonoBehaviour
             if (waypoints[i].point != null)
             {
                 Gizmos.DrawSphere(waypoints[i].point.position, 0.2f);
-
-                // Рисуем линии для всего пути
                 if (i < waypoints.Length - 1 && waypoints[i + 1].point != null)
-                {
                     Gizmos.DrawLine(waypoints[i].point.position, waypoints[i + 1].point.position);
-                }
-                // Соединяем последнюю и первую точки красной линией
-                else if (i == waypoints.Length - 1)
-                {
-                    Gizmos.color = Color.red;
-                    Gizmos.DrawLine(waypoints[i].point.position, waypoints[0].point.position);
-                }
             }
         }
     }

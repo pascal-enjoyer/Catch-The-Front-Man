@@ -586,6 +586,7 @@ GameObject:
   - component: {fileID: 4741109615768398390}
   - component: {fileID: 849143781740141996}
   - component: {fileID: 6809082901477796081}
+  - component: {fileID: 6998181350127327876}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -603,7 +604,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5866371004374622500}
@@ -626,6 +627,7 @@ MonoBehaviour:
   rotationSpeed: 5
   patrolType: 1
   GizmosOn: 1
+  animator: {fileID: 6998181350127327876}
 --- !u!114 &6809082901477796081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -650,8 +652,23 @@ MonoBehaviour:
   bulletPrefab: {fileID: 2731069355283091526, guid: 2e86e7570765cbc41b2978449223acf5, type: 3}
   firePoint: {fileID: 6337305069465327239}
   fireRate: 1
-  bulletSpeed: 10
+  bulletSpeed: 0.5
   GizmosOn: 1
+  animator: {fileID: 0}
+--- !u!114 &6998181350127327876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3533184261918191431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1be5e0f1a835d8e498d69cf1e2546082, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 4984173991117487344}
+  currentAnimation: 
 --- !u!1 &3541107210138652280
 GameObject:
   m_ObjectHideFlags: 0

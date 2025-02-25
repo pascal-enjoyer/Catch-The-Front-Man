@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour
     public bool isStopped = true;
     public bool isMovementBlocked = true;
 
+    public Vector3 raycastYOffset = new Vector3(0, 0.1f, 0);
+
     private void Update()
     {
         if (isMovementBlocked) return;
@@ -170,7 +172,7 @@ public class PlayerController : MonoBehaviour
     public bool CastRay(Vector3 direction)
     {
         RaycastHit hit;
-        if (Physics.Raycast(transform.position, direction, out hit, roomWidth, interactableLayer))
+        if (Physics.Raycast(transform.position + raycastYOffset, direction + raycastYOffset, out hit, roomWidth, interactableLayer))
         {
             // Устанавливаем целевую позицию
             targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);

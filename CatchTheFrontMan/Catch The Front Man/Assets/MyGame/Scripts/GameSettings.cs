@@ -22,7 +22,7 @@ public class GameSettings : MonoBehaviour
 
     private void Awake()
     {
-
+        //PlayerPrefs.DeleteAll; для тестировки работы уровней
         if (isInitialized) return;
         SetupSingleton();
         InitializeFrameRate();
@@ -133,6 +133,7 @@ public class GameSettings : MonoBehaviour
             else
             {
                 Debug.LogError("Level index out of range!");
+                ReturnToMainMenu(); 
             }
         }
     }
