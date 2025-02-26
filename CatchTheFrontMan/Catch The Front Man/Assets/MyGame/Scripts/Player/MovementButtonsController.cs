@@ -20,9 +20,4 @@ public class MovementButtonsController : MonoBehaviour
         playerController.OnDownButtonClicked();
     }
 
-
-    public void OnUpButtonPressed()
-    {
-        playerController.OnUpButtonClicked();
-    }
 }

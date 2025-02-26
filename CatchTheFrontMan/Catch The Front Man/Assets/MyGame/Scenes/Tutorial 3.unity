@@ -631,6 +631,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8967256469429816425, guid: dfe6e58031c5cbc43972716de094fb5f, type: 3}
   m_PrefabInstance: {fileID: 211125684}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &712094010 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6998181350127327876, guid: 968ddb851196e924ea9ab81bfd007afb, type: 3}
+  m_PrefabInstance: {fileID: 1928251465}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1be5e0f1a835d8e498d69cf1e2546082, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &732879694 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1273943973631634092, guid: 100b46f2e2ce79e4784b280c1cb09161, type: 3}
@@ -1743,7 +1754,7 @@ PrefabInstance:
     - target: {fileID: 849143781740141996, guid: 968ddb851196e924ea9ab81bfd007afb, type: 3}
       propertyPath: waypoints.Array.data[3].lookTarget
       value: 
-      objectReference: {fileID: 320543536}
+      objectReference: {fileID: 0}
     - target: {fileID: 849143781740141996, guid: 968ddb851196e924ea9ab81bfd007afb, type: 3}
       propertyPath: waypoints.Array.data[4].lookTarget
       value: 
@@ -1840,6 +1851,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6809082901477796081, guid: 968ddb851196e924ea9ab81bfd007afb, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 6524841780705935073}
+    - target: {fileID: 6809082901477796081, guid: 968ddb851196e924ea9ab81bfd007afb, type: 3}
+      propertyPath: animator
+      value: 
+      objectReference: {fileID: 712094010}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4376,6 +4395,7 @@ MonoBehaviour:
   isMoving: 0
   isStopped: 1
   isMovementBlocked: 1
+  raycastYOffset: {x: 0, y: 0.1, z: 0}
 --- !u!1 &4101625253074733081
 GameObject:
   m_ObjectHideFlags: 0

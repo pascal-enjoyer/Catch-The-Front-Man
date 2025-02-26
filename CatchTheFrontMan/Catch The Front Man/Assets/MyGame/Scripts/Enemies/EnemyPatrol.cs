@@ -31,6 +31,9 @@ public class EnemyPatrol : MonoBehaviour
     private bool isMovingForward = true;
     private EnemyVision enemyVision;
 
+    public bool isDead = false;
+
+
     public enum PatrolType { Loop, PingPong }
 
     void Start()
@@ -45,6 +48,7 @@ public class EnemyPatrol : MonoBehaviour
 
     void Update()
     {
+        if (isDead) return;
         if (enemyVision != null && enemyVision.IsPlayerVisible)
         {
             // При обнаружении игрока сбрасываем таймер ожидания
@@ -187,5 +191,12 @@ public class EnemyPatrol : MonoBehaviour
                     Gizmos.DrawLine(waypoints[i].point.position, waypoints[i + 1].point.position);
             }
         }
+    }
+
+    public void Die()
+    {
+        isDead = true;
+        enemyVision.isDead = true;
+        animator.ChangeAnimation("Die");
     }
 }

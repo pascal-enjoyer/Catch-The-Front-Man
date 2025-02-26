@@ -15,6 +15,8 @@ public class EnemyVision : MonoBehaviour
     public bool GizmosOn = true;
     public PlayerAnimationManager animator;
 
+
+
     public float shootDelay = 0.3f; // Новая переменная для задержки
 
     private bool isDelaying = true;
@@ -23,8 +25,11 @@ public class EnemyVision : MonoBehaviour
     public bool IsPlayerVisible { get; private set; }
     private bool wasPlayerVisible = false; // Добавляем флаг предыдущего состояния
 
+    public bool isDead = false;
+
     void Update()
     {
+        if (isDead) return;
         CheckPlayerVisibility();
 
         if (IsPlayerVisible)

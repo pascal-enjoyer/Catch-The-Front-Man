@@ -1,6 +1,6 @@
 
+using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -28,37 +28,58 @@ public class PlayerController : MonoBehaviour
     public bool isStopped = true;
     public bool isMovementBlocked = true;
 
+    [Header("Kill Settings")]
+    public float killStunDuration = 1f; // Длительность стана после убийства
+    private bool isStunned = false;     // Флаг стана
+
+
     public Vector3 raycastYOffset = new Vector3(0, 0.1f, 0);
 
     private void Update()
     {
-        if (isMovementBlocked) return;
+        if (isMovementBlocked || isStunned) return;
         if (!isStopped)
         {
-
             // Движение вперед
-
             animManager.ChangeAnimation("Crouch Walk");
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
-            isStopped = false;
         }
         else if (isMoving)
         {
             // Плавное перемещение к целевой позиции
-            transform.position = Vector3.MoveTowards(transform.position,
-                new Vector3(targetPosition.x, transform.position.y, transform.position.z), sideSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                new Vector3(targetPosition.x, transform.position.y, targetPosition.z), // Добавлен Z для полноты
+                sideSpeed * Time.deltaTime
+            );
 
-            // Если игрок достиг целевой позиции, обновляем состояние
             if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
             {
                 isMoving = false;
                 if (currentState == PlayerMovementState.center)
                 {
-                    isStopped = false;  
+                    isStopped = false;
                 }
             }
         }
+    }
 
+    public void TriggerKillStun()
+    {
+        if (!isStunned)
+            StartCoroutine(KillStunRoutine());
+    }
+
+    private IEnumerator KillStunRoutine()
+    {
+        isStunned = true;
+        animManager.ChangeAnimation("Idle"); // Меняем анимацию на стоячую
+
+        yield return new WaitForSeconds(killStunDuration);
+
+        isStunned = false;
+        if (!isMovementBlocked && !isStopped)
+            animManager.ChangeAnimation("Crouch Walk"); // Возвращаем к анимации движения
     }
 
     public enum PlayerMovementState
@@ -70,10 +91,6 @@ public class PlayerController : MonoBehaviour
         right
     }
 
-    public void OnUpButtonClicked()
-    {
-        
-    }
 
     public void OnLeftButtonClicked()
     {
