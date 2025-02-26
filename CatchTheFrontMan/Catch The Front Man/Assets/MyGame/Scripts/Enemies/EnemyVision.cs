@@ -98,20 +98,30 @@ public class EnemyVision : MonoBehaviour
         }
     }
 
+    // вот тут хуйня потому что игрок уже известен
+
     void CheckPlayerVisibility()
     {
         IsPlayerVisible = false;
-        Collider[] targets = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
-        foreach (Collider target in targets)
+        
+        // Быстрые проверки перед сложными вычислениями
+        if (player == null || isDead) return;
+
+        // 1. Проверка расстояния
+        Vector3 toPlayer = player.transform.position - transform.position;
+        float sqrDistance = toPlayer.sqrMagnitude;
+        if (sqrDistance > viewRadius * viewRadius) return;
+
+        // 2. Проверка угла зрения (оптимизированная через Dot product)
+        Vector3 directionToPlayer = toPlayer.normalized;
+        if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
+            return;
+
+        // 3. Проверка препятствий
+        if (!Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, 
+            Mathf.Sqrt(sqrDistance), obstacleMask))
         {
-            if (target.gameObject != player) continue;
-
-            Vector3 dirToTarget = (target.transform.position - transform.position).normalized;
-            if (Vector3.Angle(transform.forward, dirToTarget) >= viewAngle / 2) continue;
-
-            float dstToTarget = Vector3.Distance(transform.position, target.transform.position);
-            if (!Physics.Raycast(transform.position, dirToTarget, dstToTarget, obstacleMask))
-                IsPlayerVisible = true;
+            IsPlayerVisible = true;
         }
     }
 

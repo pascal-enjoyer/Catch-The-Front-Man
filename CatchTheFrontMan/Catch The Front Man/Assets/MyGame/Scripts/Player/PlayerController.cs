@@ -32,12 +32,13 @@ public class PlayerController : MonoBehaviour
     public float killStunDuration = 1f; // Длительность стана после убийства
     private bool isStunned = false;     // Флаг стана
 
+    public bool isDead = false;
 
     public Vector3 raycastYOffset = new Vector3(0, 0.1f, 0);
 
     private void Update()
     {
-        if (isMovementBlocked || isStunned) return;
+        if (isMovementBlocked || isStunned || isDead) return;
         if (!isStopped)
         {
             // Движение вперед
@@ -101,6 +102,8 @@ public class PlayerController : MonoBehaviour
             currentState = PlayerMovementState.center;
             transform.rotation = Quaternion.Euler(0,0,0);
 
+            gameObject.GetComponent<CapsuleCollider>().direction = 1;
+            gameObject.GetComponent<CapsuleCollider>().center = new Vector3(0, 0.785f, 0);
             animManager.ChangeAnimation("Crouch Walk");
             isMoving = true;
             isStopped = true;
@@ -113,7 +116,10 @@ public class PlayerController : MonoBehaviour
                     CastRay(Vector3.left);
                     currentState = PlayerMovementState.left;
 
-                    transform.rotation = Quaternion.Euler(0, 90, 0);
+                gameObject.GetComponent<CapsuleCollider>().direction = 1;
+
+                gameObject.GetComponent<CapsuleCollider>().center = new Vector3(0, 0.785f, 0);
+                transform.rotation = Quaternion.Euler(0, 90, 0);
                     animManager.ChangeAnimation("Wall Lean");
 
                     isStopped = true;
@@ -131,7 +137,11 @@ public class PlayerController : MonoBehaviour
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
             currentState = PlayerMovementState.center;
 
+            gameObject.GetComponent<CapsuleCollider>().direction = 1;
+
+            gameObject.GetComponent<CapsuleCollider>().center = new Vector3(0, 0.785f, 0);
             animManager.ChangeAnimation("Crouch Walk");
+
             transform.rotation = Quaternion.Euler(0, 0, 0);
             isMoving = true;
             isStopped = true;
@@ -141,6 +151,10 @@ public class PlayerController : MonoBehaviour
             if (CastRay(Vector3.right))
             {
                 transform.rotation = Quaternion.Euler(0, -90, 0);
+
+                gameObject.GetComponent<CapsuleCollider>().direction = 1;
+
+                gameObject.GetComponent<CapsuleCollider>().center = new Vector3(0, 0.785f, 0);
                 animManager.ChangeAnimation("Wall Lean");
 
                 currentState = PlayerMovementState.right;
@@ -159,6 +173,9 @@ public class PlayerController : MonoBehaviour
             animManager.ChangeAnimation("Crouch Walk");
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
 
+            gameObject.GetComponent<CapsuleCollider>().direction = 1;
+
+            gameObject.GetComponent<CapsuleCollider>().center = new Vector3(0, 0.785f, 0);
             transform.rotation = Quaternion.Euler(0, 0, 0);
             currentState = PlayerMovementState.center;
             isMoving = false;
@@ -169,6 +186,8 @@ public class PlayerController : MonoBehaviour
 
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
 
+            gameObject.GetComponent<CapsuleCollider>().direction = 2;
+            gameObject.GetComponent<CapsuleCollider>().center = new Vector3(0, 0.2f, 0);
             transform.rotation = Quaternion.Euler(0, 0, 0);
             animManager.ChangeAnimation("Floor Lie");
             isStopped = true;
@@ -197,5 +216,11 @@ public class PlayerController : MonoBehaviour
         }
         else
             return false;
+    }
+
+    public void Die()
+    {
+        isDead = true;
+        animManager.animator.enabled = false;
     }
 }

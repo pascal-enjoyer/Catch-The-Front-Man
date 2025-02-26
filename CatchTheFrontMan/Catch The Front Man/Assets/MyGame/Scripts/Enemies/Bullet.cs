@@ -15,9 +15,16 @@ public class Bullet : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    public void OnTriggerEnter(Collider other)
+    private void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.TryGetComponent(out PlayerController playerController))
+        {
+            playerController.Die();
+        }
+    }
 
-        Destroy(gameObject);
+    private void OnTriggerEnter(Collider other)
+    {
+        Destroy(gameObject);        
     }
 }

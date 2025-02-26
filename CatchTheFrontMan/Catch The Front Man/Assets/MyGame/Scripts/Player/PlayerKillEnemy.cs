@@ -11,6 +11,7 @@ public class PlayerKillEnemy : MonoBehaviour
 
         if (enemy != null && !enemy.isDead)
         {
+            playerController.animManager.ChangeAnimation("Stab");
             Transform enemyTransform = enemy.transform;
 
             // Рассчитываем направление к игроку в горизонтальной плоскости
