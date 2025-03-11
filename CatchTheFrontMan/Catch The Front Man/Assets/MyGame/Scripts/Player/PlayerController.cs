@@ -29,8 +29,8 @@ public class PlayerController : MonoBehaviour
     public bool isMovementBlocked = true;
 
     [Header("Kill Settings")]
-    public float killStunDuration = 1f; // Длительность стана после убийства
-    private bool isStunned = false;     // Флаг стана
+    public float killStunDuration = 3f; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    private bool isStunned = false;     // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
     public bool isDead = false;
 
@@ -41,16 +41,16 @@ public class PlayerController : MonoBehaviour
         if (isMovementBlocked || isStunned || isDead) return;
         if (!isStopped)
         {
-            // Движение вперед
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
             animManager.ChangeAnimation("Crouch Walk");
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
         }
         else if (isMoving)
         {
-            // Плавное перемещение к целевой позиции
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             transform.position = Vector3.MoveTowards(
                 transform.position,
-                new Vector3(targetPosition.x, transform.position.y, targetPosition.z), // Добавлен Z для полноты
+                new Vector3(targetPosition.x, transform.position.y, targetPosition.z), // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Z пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 sideSpeed * Time.deltaTime
             );
 
@@ -74,13 +74,13 @@ public class PlayerController : MonoBehaviour
     private IEnumerator KillStunRoutine()
     {
         isStunned = true;
-        animManager.ChangeAnimation("Idle"); // Меняем анимацию на стоячую
+        animManager.ChangeAnimation("Idle"); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
         yield return new WaitForSeconds(killStunDuration);
 
         isStunned = false;
         if (!isMovementBlocked && !isStopped)
-            animManager.ChangeAnimation("Crouch Walk"); // Возвращаем к анимации движения
+            animManager.ChangeAnimation("Crouch Walk"); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     }
 
     public enum PlayerMovementState
@@ -204,13 +204,13 @@ public class PlayerController : MonoBehaviour
         isStopped = false;
         currentState = PlayerMovementState.center;
     }
-    // Метод для кастования луча в указанном направлении
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     public bool CastRay(Vector3 direction)
     {
         RaycastHit hit;
         if (Physics.Raycast(transform.position + raycastYOffset, direction + raycastYOffset, out hit, roomWidth, interactableLayer))
         {
-            // Устанавливаем целевую позицию
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             targetPosition = new Vector3(hit.point.x, transform.position.y, hit.point.z);
             return true;
         }
@@ -222,5 +222,10 @@ public class PlayerController : MonoBehaviour
     {
         isDead = true;
         animManager.animator.enabled = false;
+    }
+
+    public void ApplyEffect(IBonusEffect effect)
+    {
+        effect.ApplyEffect(this);
     }
 }

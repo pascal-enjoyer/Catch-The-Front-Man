@@ -17,13 +17,13 @@ public class EnemyVision : MonoBehaviour
 
 
 
-    public float shootDelay = 0.3f; // Новая переменная для задержки
+    public float shootDelay = 0.3f; // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     private bool isDelaying = true;
     private float delayTimer = 0f;
     private float fireTimer = 0f;
     public bool IsPlayerVisible { get; private set; }
-    private bool wasPlayerVisible = false; // Добавляем флаг предыдущего состояния
+    private bool wasPlayerVisible = false; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     public bool isDead = false;
 
@@ -37,7 +37,7 @@ public class EnemyVision : MonoBehaviour
             RotateTowardsPlayer();
             animator.ChangeAnimation("Firing");
 
-            // Если игрок только что стал видимым - начинаем задержку
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (!wasPlayerVisible)
             {
                 delayTimer = shootDelay;
@@ -50,7 +50,7 @@ public class EnemyVision : MonoBehaviour
                 if (delayTimer <= 0)
                 {
                     isDelaying = false;
-                    fireTimer = 1f / fireRate; // Готовы к первому выстрелу
+                    fireTimer = 1f / fireRate; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 }
             }
             else
@@ -70,7 +70,7 @@ public class EnemyVision : MonoBehaviour
                 animator.ChangeAnimation("Idle");
             }
             fireTimer = 0f;
-            isDelaying = true; // Сбрасываем задержку при потере цели
+            isDelaying = true; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         }
 
         wasPlayerVisible = IsPlayerVisible;
@@ -88,36 +88,42 @@ public class EnemyVision : MonoBehaviour
             rotationSpeed * Time.deltaTime
         );
     }
+    
     void Shoot()
     {
-        if (bulletPrefab && firePoint)
+        if (bulletPrefab && firePoint && player != null)
         {
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+            Vector3 direction = (player.transform.position - firePoint.position).normalized;
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+            Quaternion bulletRotation = Quaternion.LookRotation(direction);
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, bulletRotation);
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent) bulletComponent.speed = bulletSpeed;
         }
     }
 
-    // вот тут хуйня потому что игрок уже известен
+    // пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     void CheckPlayerVisibility()
     {
         IsPlayerVisible = false;
         
-        // Быстрые проверки перед сложными вычислениями
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (player == null || isDead) return;
 
-        // 1. Проверка расстояния
+        // 1. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Vector3 toPlayer = player.transform.position - transform.position;
         float sqrDistance = toPlayer.sqrMagnitude;
         if (sqrDistance > viewRadius * viewRadius) return;
 
-        // 2. Проверка угла зрения (оптимизированная через Dot product)
+        // 2. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Dot product)
         Vector3 directionToPlayer = toPlayer.normalized;
         if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
             return;
 
-        // 3. Проверка препятствий
+        // 3. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (!Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, 
             Mathf.Sqrt(sqrDistance), obstacleMask))
         {

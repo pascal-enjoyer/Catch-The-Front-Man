@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6939941899714761868}
   - component: {fileID: 2098782624611150674}
   - component: {fileID: -787334779461703516}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,8 +47,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1de5a4ce47ac414991c3c5561eb45bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
-  lifetime: 2
+  speed: 100
+  lifetime: 3
   damage: 1
 --- !u!54 &2098782624611150674
 Rigidbody:
@@ -111,7 +111,7 @@ GameObject:
   - component: {fileID: 710200517812333400}
   - component: {fileID: 4556524477795166389}
   - component: {fileID: 3264348311720427492}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Zylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}

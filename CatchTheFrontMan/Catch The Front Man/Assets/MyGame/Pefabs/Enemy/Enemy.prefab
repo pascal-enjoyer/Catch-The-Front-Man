@@ -408,13 +408,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2060149897131951393}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -0.6519, y: 0.0039, z: 0.0449}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5602641999672709024}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1 &2183422007523891607
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,6 +628,7 @@ MonoBehaviour:
   patrolType: 1
   GizmosOn: 1
   animator: {fileID: 6998181350127327876}
+  isDead: 0
 --- !u!114 &6809082901477796081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -640,8 +641,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 127c7c859260bb043929dcca77a5ddfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 5
-  viewAngle: 90
+  viewRadius: 10
+  viewAngle: 115
   targetMask:
     serializedVersion: 2
     m_Bits: 64
@@ -652,9 +653,12 @@ MonoBehaviour:
   bulletPrefab: {fileID: 2731069355283091526, guid: 2e86e7570765cbc41b2978449223acf5, type: 3}
   firePoint: {fileID: 6337305069465327239}
   fireRate: 1
-  bulletSpeed: 0.5
+  bulletSpeed: 10
+  rotationSpeed: 5
   GizmosOn: 1
   animator: {fileID: 0}
+  shootDelay: 0.3
+  isDead: 0
 --- !u!114 &6998181350127327876
 MonoBehaviour:
   m_ObjectHideFlags: 0

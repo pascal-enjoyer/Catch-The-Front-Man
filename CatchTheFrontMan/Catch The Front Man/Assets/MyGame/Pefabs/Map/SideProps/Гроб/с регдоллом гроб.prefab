@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6616444235760828896}
   - component: {fileID: 8416946943381160897}
   - component: {fileID: 2609764576408146409}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Plan.010
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -112,7 +112,7 @@ GameObject:
   - component: {fileID: 7225416525034139864}
   - component: {fileID: 981530715677121623}
   - component: {fileID: 481487614127408402}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: "\u0441 \u0440\u0435\u0433\u0434\u043E\u043B\u043B\u043E\u043C \u0433\u0440\u043E\u0431"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -195,7 +195,7 @@ GameObject:
   - component: {fileID: 6819393870753999947}
   - component: {fileID: 5083768315393646772}
   - component: {fileID: 5467172429314721695}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Cube.007
   m_TagString: Untagged
   m_Icon: {fileID: 0}
