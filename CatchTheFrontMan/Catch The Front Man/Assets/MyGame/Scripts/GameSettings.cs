@@ -22,7 +22,7 @@ public class GameSettings : MonoBehaviour
 
     private void Awake()
     {
-        //PlayerPrefs.DeleteAll; для тестировки работы уровней
+        //PlayerPrefs.DeleteAll; пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (isInitialized) return;
         SetupSingleton();
         InitializeFrameRate();
@@ -55,7 +55,7 @@ public class GameSettings : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.buildIndex == 0) // Главное меню
+        if (scene.buildIndex == 0) // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         {
 
             if (!isTutorialCompleted)
@@ -96,7 +96,7 @@ public class GameSettings : MonoBehaviour
 
     public void CompleteLevel(int level)
     {
-        // Сохраняем только максимальный пройденный уровень
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         completedLevels = Mathf.Max(completedLevels, level);
         SaveSettings();
     }
@@ -122,7 +122,7 @@ public class GameSettings : MonoBehaviour
     {
         if (isTutorialCompleted)
         {
-            // Основные уровни идут после туториалов
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             int sceneIndex = totalTutorialLevels + level;
 
             if (sceneIndex < SceneManager.sceneCountInBuildSettings)

@@ -1,24 +1,47 @@
+using System.Collections;
 using UnityEngine;
 
-public interface IBonusEffect
+public abstract class Bonus : MonoBehaviour
 {
-    void ApplyEffect(PlayerController player);
-}
+    [SerializeField] protected float duration = 5f;
 
-public class Bonus : MonoBehaviour
-{
-    public IBonusEffect effect; // Эффект бонуса
+    public Sprite bonusIcon;
 
-    private void OnTriggerEnter(Collider other)
+    protected GameObject target;
+
+    private float timer;
+
+    public float TimeToEnd
     {
-        if (other.CompareTag("Player"))
-        {
-            PlayerController player = other.GetComponent<PlayerController>();
-            if (player != null)
-            {
-                player.ApplyEffect(effect); // Применяем эффект
-                Destroy(gameObject); // Уничтожаем бонус
-            }
-        }
+        get { return timer; }
     }
+
+    public float Duration
+    {
+        get { return duration; }
+    }
+
+    public void Initialize(GameObject target)
+    {
+        this.target = target;
+        timer = duration;
+        ApplyEffect(true);
+        StartCoroutine(BuffTimer());
+    }
+
+    private IEnumerator BuffTimer()
+    {
+        while (timer > 0)
+        {
+            timer -= Time.deltaTime;
+            UpdateEffect();
+            yield return null;
+        }
+        ApplyEffect(false);
+        Destroy(this);
+    }
+
+    
+    protected abstract void ApplyEffect(bool activate);
+    protected virtual void UpdateEffect() { }
 }

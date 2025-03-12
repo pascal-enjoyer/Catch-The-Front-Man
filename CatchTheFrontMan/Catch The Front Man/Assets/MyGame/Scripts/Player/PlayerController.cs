@@ -224,8 +224,5 @@ public class PlayerController : MonoBehaviour
         animManager.animator.enabled = false;
     }
 
-    public void ApplyEffect(IBonusEffect effect)
-    {
-        effect.ApplyEffect(this);
-    }
+
 }

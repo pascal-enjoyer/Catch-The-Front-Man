@@ -21,7 +21,7 @@ public class BonusManager : MonoBehaviour
         {
             if (pair.spawnPoint != null)
             {
-                Instantiate(pair.bonusPrefab, pair.spawnPoint.position, pair.spawnPoint.rotation);
+                Instantiate(pair.bonusPrefab, pair.spawnPoint.position, pair.spawnPoint.rotation, transform);
             }
         }
     }

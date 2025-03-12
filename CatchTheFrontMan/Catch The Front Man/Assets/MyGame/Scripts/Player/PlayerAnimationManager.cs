@@ -10,7 +10,7 @@ public class PlayerAnimationManager : MonoBehaviour
     public void ChangeAnimation(string animName)
     {
         if (currentAnimation == animName) return;
-        animator.Play(animName); // Используем Play вместо CrossFade
+        animator.Play(animName); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Play пїЅпїЅпїЅпїЅпїЅпїЅ CrossFade
         currentAnimation = animName;
     }
 }

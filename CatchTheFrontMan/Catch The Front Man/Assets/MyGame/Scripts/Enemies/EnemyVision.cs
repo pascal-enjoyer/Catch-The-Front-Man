@@ -29,7 +29,6 @@ public class EnemyVision : MonoBehaviour
 
     void Update()
     {
-        if (isDead) return;
         CheckPlayerVisibility();
 
         if (IsPlayerVisible)

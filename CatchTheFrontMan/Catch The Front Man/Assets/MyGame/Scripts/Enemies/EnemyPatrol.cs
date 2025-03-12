@@ -51,7 +51,7 @@ public class EnemyPatrol : MonoBehaviour
         if (isDead) return;
         if (enemyVision != null && enemyVision.IsPlayerVisible)
         {
-            // При обнаружении игрока сбрасываем таймер ожидания
+            // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             if (isWaiting)
             {
                 waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
@@ -116,7 +116,7 @@ public class EnemyPatrol : MonoBehaviour
 
     void HandleWaiting()
     {
-        // Добавляем проверку на видимость игрока
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (enemyVision != null && enemyVision.IsPlayerVisible)
         {
             waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
@@ -199,4 +199,6 @@ public class EnemyPatrol : MonoBehaviour
         enemyVision.isDead = true;
         animator.ChangeAnimation("Die");
     }
+
+    
 }
