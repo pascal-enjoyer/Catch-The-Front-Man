@@ -93,7 +93,7 @@ public class EnemyVision : MonoBehaviour
         if (bulletPrefab && firePoint && player != null)
         {
             // ������������ ����������� �� ����� �������� � ������
-            Vector3 direction = (player.transform.position - firePoint.position).normalized;
+            Vector3 direction = (player.transform.position - firePoint.position).normalized+new Vector3(0, 0.16f, 0);
             // ������� �������, ������������ �� ������
             Quaternion bulletRotation = Quaternion.LookRotation(direction);
             // ������� ���� � ���������� ������������
@@ -110,7 +110,7 @@ public class EnemyVision : MonoBehaviour
         IsPlayerVisible = false;
         
         // ������� �������� ����� �������� ������������
-        if (player == null || isDead) return;
+        if (player == null || isDead || player.GetComponent<PlayerController>().isDead) return;
 
         // 1. �������� ����������
         Vector3 toPlayer = player.transform.position - transform.position;

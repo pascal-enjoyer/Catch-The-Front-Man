@@ -623,7 +623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waypoints: []
-  moveSpeed: 3
+  moveSpeed: 5
   rotationSpeed: 5
   patrolType: 1
   GizmosOn: 1
@@ -652,8 +652,8 @@ MonoBehaviour:
   player: {fileID: 0}
   bulletPrefab: {fileID: 2731069355283091526, guid: 2e86e7570765cbc41b2978449223acf5, type: 3}
   firePoint: {fileID: 6337305069465327239}
-  fireRate: 1
-  bulletSpeed: 10
+  fireRate: 10
+  bulletSpeed: 1000
   rotationSpeed: 5
   GizmosOn: 1
   animator: {fileID: 0}
