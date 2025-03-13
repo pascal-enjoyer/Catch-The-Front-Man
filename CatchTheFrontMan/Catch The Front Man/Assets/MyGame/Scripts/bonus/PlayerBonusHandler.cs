@@ -7,10 +7,24 @@ public class PlayerBonusHandler : MonoBehaviour
 
     public void AcquireBuff(GameObject buffPrefab)
     {
-        var buffInstance = gameObject.AddComponent(buffPrefab.GetComponent<Bonus>().GetType());
-        Bonus buffComponent = buffInstance as Bonus;
-        buffComponent.Initialize(gameObject);
-        BonusActivated?.Invoke(buffComponent);
+        // Получаем компонент Bonus из префаба
+        var prefabBonus = buffPrefab.GetComponent<Bonus>();
+        if (prefabBonus == null)
+        {
+            Debug.LogError("Prefab has no Bonus component!");
+            return;
+        }
+
+        // Создаем новый компонент на игроке
+        var buffInstance = gameObject.AddComponent(prefabBonus.GetType()) as Bonus;
+
+        // Копируем данные из префаба в новый компонент
+        buffInstance.SetData(prefabBonus.Data);
+
+        // Инициализируем бонус
+        buffInstance.Initialize(gameObject);
+
+        // Вызываем событие
+        BonusActivated?.Invoke(buffInstance);
     }
-    
 }

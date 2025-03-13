@@ -118,8 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ac0a4c22f3c90c419f3cd57ee145d5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  duration: 5
-  bonusIcon: {fileID: 21300000, guid: 5a9a97db89dec4a43bd978f60f2a8cb0, type: 3}
+  bonusData: {fileID: 0}
 --- !u!135 &5665267166169162643
 SphereCollider:
   m_ObjectHideFlags: 0

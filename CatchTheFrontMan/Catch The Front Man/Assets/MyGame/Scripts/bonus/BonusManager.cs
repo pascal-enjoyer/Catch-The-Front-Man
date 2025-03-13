@@ -9,7 +9,7 @@ public class BonusManager : MonoBehaviour
     public class SpawnPointPair
     {
         public Transform spawnPoint;
-        public GameObject bonusPrefab;
+        public BonusData bonusPrefab;
     }
 
     public List<SpawnPointPair> spawnPointPairs = new List<SpawnPointPair>();
@@ -21,7 +21,9 @@ public class BonusManager : MonoBehaviour
         {
             if (pair.spawnPoint != null)
             {
-                Instantiate(pair.bonusPrefab, pair.spawnPoint.position, pair.spawnPoint.rotation, transform);
+
+                GameObject spawnedBonus = Instantiate(pair.bonusPrefab.bonusPrefab, pair.spawnPoint.position, pair.spawnPoint.rotation, transform);
+                spawnedBonus.GetComponent<Bonus>().SetData(pair.bonusPrefab);
             }
         }
     }

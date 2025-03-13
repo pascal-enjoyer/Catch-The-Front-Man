@@ -395,7 +395,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawnPointPairs:
   - spawnPoint: {fileID: 436465811}
-    bonusPrefab: {fileID: 6054377265588855335, guid: b3ae8bda3697c4348af6d2bba62bd95c, type: 3}
+    bonusPrefab: {fileID: 11400000, guid: c3fb740146a2e8b4999b2a6197da69de, type: 2}
 --- !u!1 &436465810
 GameObject:
   m_ObjectHideFlags: 0

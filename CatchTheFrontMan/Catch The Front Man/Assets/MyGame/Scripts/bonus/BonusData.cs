@@ -1,9 +1,16 @@
+// BonusData.cs
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Bonuses/Bonus Data")]
+[CreateAssetMenu(menuName = "Bonuses/New Bonus")]
 public class BonusData : ScriptableObject
 {
+    [Header("Visuals")]
     public Sprite icon;
-    public float duration;
-    public GameObject effectPrefab; // Префаб с логикой бонуса (например, FreezeEnemiesBonus)
+    public Color color = Color.white;
+
+    [Header("Settings")]
+    public float duration = 5f;
+
+    [Header("Prefab")]
+    public GameObject bonusPrefab; // Шаблон бонуса
 }

@@ -1,32 +1,30 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 
 public abstract class Bonus : MonoBehaviour
 {
-    [SerializeField] protected float duration = 5f;
-
-    public Sprite bonusIcon;
-
+    private BonusData data;
     protected GameObject target;
-
     private float timer;
 
-    public float TimeToEnd
-    {
-        get { return timer; }
-    }
+    public BonusData Data { get { return data; } }
+    public float TimeToEnd { get { return timer; } }
 
-    public float Duration
+    public void SetData(BonusData data)
     {
-        get { return duration; }
+        this.data = data;
     }
 
     public void Initialize(GameObject target)
     {
         this.target = target;
-        timer = duration;
+        timer = data.duration;
+
         ApplyEffect(true);
         StartCoroutine(BuffTimer());
+
+        // Для теста - можно удалить
+        Debug.Log($"Bonus initialized: {data.name} | Duration: {data.duration}");
     }
 
     private IEnumerator BuffTimer()
@@ -41,7 +39,6 @@ public abstract class Bonus : MonoBehaviour
         Destroy(this);
     }
 
-    
     protected abstract void ApplyEffect(bool activate);
     protected virtual void UpdateEffect() { }
 }

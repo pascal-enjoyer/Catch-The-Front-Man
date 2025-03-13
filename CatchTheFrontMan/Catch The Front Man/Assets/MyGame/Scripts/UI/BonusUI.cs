@@ -23,7 +23,7 @@ public class BonusUI : MonoBehaviour
     public void Init(Bonus activatedBonus)
     {
         currentBonus = activatedBonus;
-        icon.sprite = currentBonus.bonusIcon;
+        icon.sprite = currentBonus.Data.icon;
 
         isCounting = true;
     }
@@ -31,7 +31,7 @@ public class BonusUI : MonoBehaviour
     public void UpdateTimer()
     {
         timer.text = currentBonus.TimeToEnd.ToString().Substring(0, 3);
-        fillingImage.fillAmount = currentBonus.TimeToEnd/currentBonus.Duration;
+        fillingImage.fillAmount = currentBonus.TimeToEnd/currentBonus.Data.duration;
     }
 
 }

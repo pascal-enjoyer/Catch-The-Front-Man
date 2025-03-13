@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class FreezeEnemiesBonus : Bonus
 {
-
     protected override void ApplyEffect(bool activate)
     {
         foreach (GameObject enemy in EnemySpawner.Instance.spawnedEnemies)
