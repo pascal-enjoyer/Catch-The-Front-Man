@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 262e8b165716c1a45b3e30e55687d847, type: 3}
+  m_Name: Suit
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: d7a4df56ef09c634dbec2631a632116c, type: 3}
+  color: {r: 1, g: 1, b: 1, a: 1}
+  duration: 5
+  bonusPrefab: {fileID: 6054377265588855335, guid: b3ae8bda3697c4348af6d2bba62bd95c, type: 3}

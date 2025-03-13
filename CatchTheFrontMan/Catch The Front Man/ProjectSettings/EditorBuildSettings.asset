@@ -50,6 +50,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/MyGame/Scenes/Level 10.unity
     guid: bf475315fa2498344a01dfca0c38f1e9
+  - enabled: 1
+    path: Assets/MyGame/Scenes/test.unity
+    guid: 2e896ae6ef850db438c0ad5f5fed8848
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 4c69e2d9d6b102842a2eda6a6c163253, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
