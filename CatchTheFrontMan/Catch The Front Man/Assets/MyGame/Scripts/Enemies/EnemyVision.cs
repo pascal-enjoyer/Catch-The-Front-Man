@@ -15,20 +15,31 @@ public class EnemyVision : MonoBehaviour
     public bool GizmosOn = true;
     public PlayerAnimationManager animator;
 
-
-
-    public float shootDelay = 0.3f; // ����� ���������� ��� ��������
+    public float shootDelay = 0.3f; // Задержка перед стрельбой
 
     private bool isDelaying = true;
     private float delayTimer = 0f;
     private float fireTimer = 0f;
-    public bool IsPlayerVisible { get; private set; }
-    private bool wasPlayerVisible = false; // ��������� ���� ����������� ���������
+    public bool IsPlayerVisible;
+    private bool wasPlayerVisible = false;
 
     public bool isDead = false;
+    public bool enemyTouchesPlayer = false;
+
+    private Collider _playerCollider; // Кэшируем коллайдер игрока
+
+    void Start()
+    {
+        if (player != null)
+        {
+            _playerCollider = player.GetComponent<Collider>(); // Кэшируем коллайдер игрока
+        }
+    }
 
     void Update()
     {
+        if (player == null || _playerCollider == null) return;
+
         CheckPlayerVisibility();
 
         if (IsPlayerVisible)
@@ -36,7 +47,7 @@ public class EnemyVision : MonoBehaviour
             RotateTowardsPlayer();
             animator.ChangeAnimation("Firing");
 
-            // ���� ����� ������ ��� ���� ������� - �������� ��������
+            // Если игрок только что стал видимым — запускаем задержку
             if (!wasPlayerVisible)
             {
                 delayTimer = shootDelay;
@@ -49,7 +60,7 @@ public class EnemyVision : MonoBehaviour
                 if (delayTimer <= 0)
                 {
                     isDelaying = false;
-                    fireTimer = 1f / fireRate; // ������ � ������� ��������
+                    fireTimer = 1f / fireRate;
                 }
             }
             else
@@ -69,16 +80,18 @@ public class EnemyVision : MonoBehaviour
                 animator.ChangeAnimation("Idle");
             }
             fireTimer = 0f;
-            isDelaying = true; // ���������� �������� ��� ������ ����
+            isDelaying = true; // Сбрасываем задержку при потере видимости
         }
 
         wasPlayerVisible = IsPlayerVisible;
     }
 
-
     void RotateTowardsPlayer()
     {
-        Vector3 direction = (player.transform.position - transform.position).normalized;
+        Vector3 playerCenter = GetPlayerAimPoint(); // Получаем точку прицеливания
+        Vector3 direction = (playerCenter - transform.position).normalized;
+
+        // Плавный поворот только по горизонтали
         direction.y = 0;
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(
@@ -87,44 +100,52 @@ public class EnemyVision : MonoBehaviour
             rotationSpeed * Time.deltaTime
         );
     }
-    
+
     void Shoot()
     {
         if (bulletPrefab && firePoint && player != null)
         {
-            // ������������ ����������� �� ����� �������� � ������
-            Vector3 direction = (player.transform.position - firePoint.position).normalized+new Vector3(0, 0.16f, 0);
-            // ������� �������, ������������ �� ������
+            Vector3 aimPoint = GetPlayerAimPoint();
+            Vector3 direction = (aimPoint - firePoint.position).normalized;
+
             Quaternion bulletRotation = Quaternion.LookRotation(direction);
-            // ������� ���� � ���������� ������������
             GameObject bullet = Instantiate(bulletPrefab, firePoint.position, bulletRotation);
+
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
             if (bulletComponent) bulletComponent.speed = bulletSpeed;
         }
     }
 
-    // ��� ��� ����� ������ ��� ����� ��� ��������
+    Vector3 GetPlayerAimPoint()
+    {
+        // Используем центр коллайдера игрока
+        if (_playerCollider != null)
+        {
+            return _playerCollider.bounds.center;
+        }
+        return player.transform.position; // На случай, если коллайдер отсутствует
+    }
 
     void CheckPlayerVisibility()
     {
         IsPlayerVisible = false;
-        
-        // ������� �������� ����� �������� ������������
         if (player == null || isDead || player.GetComponent<PlayerController>().isDead) return;
 
-        // 1. �������� ����������
-        Vector3 toPlayer = player.transform.position - transform.position;
+        Vector3 aimPoint = GetPlayerAimPoint();
+        Vector3 toPlayer = aimPoint - transform.position;
+
+        // 1. Проверка расстояния
         float sqrDistance = toPlayer.sqrMagnitude;
         if (sqrDistance > viewRadius * viewRadius) return;
 
-        // 2. �������� ���� ������ (���������������� ����� Dot product)
+        // 2. Проверка угла обзора
         Vector3 directionToPlayer = toPlayer.normalized;
-        if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad))
+        if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad) && !enemyTouchesPlayer)
             return;
 
-        // 3. �������� �����������
-        if (!Physics.Raycast(transform.position, directionToPlayer, out RaycastHit hit, 
-            Mathf.Sqrt(sqrDistance), obstacleMask))
+        // 3. Проверка препятствий
+        if (!Physics.Raycast(firePoint.position, directionToPlayer,
+            out RaycastHit hit, Mathf.Sqrt(sqrDistance), obstacleMask) || enemyTouchesPlayer)
         {
             IsPlayerVisible = true;
         }
@@ -144,10 +165,10 @@ public class EnemyVision : MonoBehaviour
         Gizmos.DrawLine(transform.position, transform.position + viewAngleA * viewRadius);
         Gizmos.DrawLine(transform.position, transform.position + viewAngleB * viewRadius);
 
-        if (IsPlayerVisible)
+        if (IsPlayerVisible && player != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, player.transform.position);
+            Gizmos.DrawLine(firePoint.position, GetPlayerAimPoint());
         }
     }
 
@@ -159,5 +180,13 @@ public class EnemyVision : MonoBehaviour
             0,
             Mathf.Cos(angleInDegrees * Mathf.Deg2Rad)
         );
+    }
+
+    public void OnTriggerStay(Collider collision)
+    {
+        if (collision.gameObject.TryGetComponent(out PlayerController playerController))
+        {
+            enemyTouchesPlayer = true;
+        }
     }
 }

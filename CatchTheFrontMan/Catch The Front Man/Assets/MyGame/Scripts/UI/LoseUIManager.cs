@@ -6,10 +6,17 @@ public class LoseUIManager : MonoBehaviour
 
     public GameObject spawnedLoseUI;
 
+    public PlayerReviver PlayerReviver;
+
     public void SpawnLoseUI()
     {
-        LoseUIprefab.SetActive(true);
-        LoseUIprefab.GetComponent<LoseUI>().PlayerRevived.AddListener(DestroyLoseUI);
+        if (spawnedLoseUI == null)
+        {
+            spawnedLoseUI = Instantiate(LoseUIprefab, transform);
+            spawnedLoseUI.GetComponent<LoseUI>().PlayerRevived.AddListener(PlayerReviver.RevivePlayer);
+            spawnedLoseUI.GetComponent<LoseUI>().PlayerRevived.AddListener(DestroyLoseUI);
+
+        }
     }
 
     public void DestroyLoseUI()

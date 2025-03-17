@@ -6,6 +6,8 @@ public class Bullet : MonoBehaviour
     public float lifetime = 2f;
     public int damage = 1;
 
+    [SerializeField] private bool isDeadly = true;
+
     private Rigidbody rb;
 
     public void Start()
@@ -17,7 +19,8 @@ public class Bullet : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.TryGetComponent(out PlayerController playerController))
+        if (!isDeadly) return;
+        if (collision.gameObject.TryGetComponent(out PlayerController playerController) )
         {
             playerController.Die();
 

@@ -25,7 +25,7 @@ public class LoseUI : MonoBehaviour
 
     public void OnReviveButtonClicked()
     {
-        PlayerRevived.Invoke();
+        PlayerRevived?.Invoke();
     }
 
     public void OnMenuButtonClicked()

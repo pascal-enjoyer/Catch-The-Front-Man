@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
@@ -35,6 +36,8 @@ public class PlayerController : MonoBehaviour
     public bool isDead = false;
 
     public Vector3 raycastYOffset = new Vector3(0, 0.1f, 0);
+
+    public UnityEvent PlayerDie;
 
     private void Update()
     {
@@ -95,7 +98,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnLeftButtonClicked()
     {
-        if (isMovementBlocked) return;
+        if (isMovementBlocked || isDead) return;
         if (currentState == antiPairs[PlayerMovementState.left])
         {
             targetPosition = new Vector3(0, transform.position.y, transform.position.z);
@@ -130,7 +133,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnRightButtonClicked()
     {
-        if (isMovementBlocked) return;
+        if (isMovementBlocked || isDead) return;
         if (currentState == antiPairs[PlayerMovementState.right])
         {
 
@@ -166,7 +169,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnDownButtonClicked()
     {
-        if (isMovementBlocked) return;
+        if (isMovementBlocked || isDead) return;
         if (currentState == PlayerMovementState.down)
         {
 
@@ -220,9 +223,12 @@ public class PlayerController : MonoBehaviour
 
     public void Die()
     {
+        if (isDead) return;
         isDead = true;
         animManager.animator.enabled = false;
+        PlayerDie.Invoke();
     }
+
 
 
 }

@@ -3,41 +3,40 @@ using UnityEngine;
 public class PlayerKillEnemy : MonoBehaviour
 {
     [Range(90, 180)]
-    public float killAngle = 120f; // Угол для убийства сзади (можно настраивать в инспекторе)
+    public float killAngle = 120f; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
     [SerializeField] private PlayerController playerController;
-    private void OnCollisionEnter(Collision collision)
+
+    private void OnTriggerEnter(Collider other)
     {
-        EnemyPatrol enemy = collision.gameObject.GetComponent<EnemyPatrol>();
+        EnemyPatrol enemy = other.gameObject.GetComponent<EnemyPatrol>();
 
         if (enemy != null && !enemy.isDead)
         {
-            playerController.animManager.ChangeAnimation("Stab");
             Transform enemyTransform = enemy.transform;
-
-            // Рассчитываем направление к игроку в горизонтальной плоскости
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             Vector3 directionToPlayer = transform.position - enemyTransform.position;
             directionToPlayer.y = 0;
             directionToPlayer.Normalize();
-
-            // Получаем направление взгляда врага в горизонтальной плоскости
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             Vector3 enemyForward = enemyTransform.forward;
             enemyForward.y = 0;
             enemyForward.Normalize();
+            
 
-            // Вычисляем угол между направлением взгляда и игроком
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             float angle = Vector3.Angle(enemyForward, directionToPlayer);
-
 
             if (angle >= killAngle)
             {
+                playerController.animManager.ChangeAnimation("Stab");
                 Debug.Log("Enemy killed from behind");
                 enemy.Die();
-
-                // Активируем стан игрока
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                 if (playerController != null)
                     playerController.TriggerKillStun();
             }
-            collision.gameObject.GetComponent<CapsuleCollider>().isTrigger = true;
+            other.gameObject.GetComponent<CapsuleCollider>().isTrigger = true;
         }
+
     }
 }
