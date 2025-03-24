@@ -42,7 +42,19 @@ public class EnemyPatrol : MonoBehaviour
         if (waypoints.Length > 0)
         {
             if (waypoints[currentWaypointIndex] != null)
+            {
                 targetPosition = waypoints[currentWaypointIndex].point.position;
+                transform.position = targetPosition;
+
+                // Добавляем принудительный поворот к точке при старте
+                RotateImmediatelyToTarget();
+            }
+
+            if (waypoints.Length == 1)
+            {
+                StartWaiting();
+                animator.ChangeAnimation("Idle");
+            }
         }
     }
 
@@ -51,11 +63,17 @@ public class EnemyPatrol : MonoBehaviour
         if (isDead) return;
         if (enemyVision != null && enemyVision.IsPlayerVisible)
         {
-            // ��� ����������� ������ ���������� ������ ��������
             if (isWaiting)
             {
                 waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
             }
+            return;
+        }
+
+        // Разрешаем поворот даже при одной точке
+        if (waypoints.Length == 1)
+        {
+            HandleSingleWaypoint();
             return;
         }
 
@@ -72,17 +90,46 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
+    void HandleSingleWaypoint()
+    {
+        // Поворачиваемся к точке даже если она одна
+        RotateTowardsTarget();
+
+        // Обработка ожидания с поворотом
+        if (isWaiting)
+        {
+            HandleWaiting();
+        }
+        else if (waypoints[0].GetWaitTime() > 0)
+        {
+            StartWaiting();
+        }
+    }
+
+    void RotateImmediatelyToTarget()
+    {
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        if (direction != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
+    }
+
     void MoveToWaypoint()
     {
+        // Двигаемся только если есть куда двигаться
+        if (waypoints.Length <= 1 || currentWaypointIndex >= waypoints.Length)
+            return;
+
         transform.position = Vector3.MoveTowards(
             transform.position,
             targetPosition,
             moveSpeed * Time.deltaTime
         );
 
+        // Обновляем анимацию только если есть куда двигаться
         if (enemyVision == null || !enemyVision.IsPlayerVisible)
             animator.ChangeAnimation("Walk");
-
         if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
         {
             if (waypoints[currentWaypointIndex].GetWaitTime() > 0)
@@ -97,6 +144,7 @@ public class EnemyPatrol : MonoBehaviour
             }
         }
     }
+
 
     void StartWaiting()
     {
@@ -116,10 +164,17 @@ public class EnemyPatrol : MonoBehaviour
 
     void HandleWaiting()
     {
-        // ��������� �������� �� ��������� ������
         if (enemyVision != null && enemyVision.IsPlayerVisible)
         {
             waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
+            return;
+        }
+
+        // Для случая с одной точкой - постоянный idle
+        if (waypoints.Length == 1)
+        {
+            animator.ChangeAnimation("Idle");
+            RotateDuringWait();
             return;
         }
 
@@ -132,6 +187,7 @@ public class EnemyPatrol : MonoBehaviour
             SetNextWaypoint();
         }
     }
+
     void SetNextWaypoint()
     {
         if (waypoints.Length <= 1) return;
@@ -159,7 +215,11 @@ public class EnemyPatrol : MonoBehaviour
 
     void RotateTowardsTarget()
     {
+        if (waypoints.Length == 0) return;
+
         Vector3 direction = (targetPosition - transform.position).normalized;
+        if (direction == Vector3.zero) return;
+
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(
             transform.rotation,

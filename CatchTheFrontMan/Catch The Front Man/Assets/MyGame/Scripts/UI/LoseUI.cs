@@ -11,7 +11,7 @@ public class LoseUI : MonoBehaviour
 
     public UnityEvent PlayerRevived;
 
-    public void Start()
+    private void Start()
     {
         restartButton.onClick.AddListener(OnRestartButtonClicked);
         reviveButton.onClick.AddListener(OnReviveButtonClicked);

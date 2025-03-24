@@ -1,25 +1,25 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerReviver : MonoBehaviour
 {
-    public GameObject playerPrefab;
-
-    public GameObject currentPlayer;
-
-    public Transform playerPosition;
-
     public float invincibleTime = 3f;
+
+    private PlayerManager playerManager => PlayerManager.Instance;
 
     public void RevivePlayer()
     {
-        playerPosition = currentPlayer.transform;
-        Transform playerParentTransform = playerPosition.parent;
+        Transform playerPosition = playerManager.currentPlayer.transform;
+        GameObject player = playerManager.currentPlayer;
 
-        Destroy(currentPlayer);
-        currentPlayer = Instantiate(playerPrefab, playerParentTransform);
-        currentPlayer.transform.position = playerPosition.position;
-        currentPlayer.GetComponent<PlayerController>().StartMovingForward();
+        Destroy(player);
+        player = Instantiate(playerManager.playerPrefab, playerManager.transform);
+        player.transform.position = playerPosition.position;
 
+        player.GetComponent<PlayerInvincibility>().ActivateInvincibility(invincibleTime);
+        playerManager.currentPlayer = player;
+        playerManager.currentPlayer.GetComponent<PlayerController>().StartMovingForward();
+        PlayerManager.PlayerChanged.Invoke(player);
     }
 }

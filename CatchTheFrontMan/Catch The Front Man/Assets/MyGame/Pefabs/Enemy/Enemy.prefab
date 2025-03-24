@@ -606,8 +606,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.2, y: 1.2, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5866371004374622500}
   m_Father: {fileID: 0}
@@ -651,15 +651,16 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 55
-  player: {fileID: 0}
   bulletPrefab: {fileID: 2731069355283091526, guid: 2e86e7570765cbc41b2978449223acf5, type: 3}
   firePoint: {fileID: 6337305069465327239}
-  fireRate: 10
-  bulletSpeed: 10
-  rotationSpeed: 5
+  fireRate: 5
+  bulletSpeed: 20
+  rotationSpeed: 6
   GizmosOn: 1
   animator: {fileID: 6998181350127327876}
-  shootDelay: 0.1
+  shootDelay: 0.2
+  verticalOffset: 0
+  debugPrediction: 0
   IsPlayerVisible: 0
   isDead: 0
   enemyTouchesPlayer: 0

@@ -782,6 +782,7 @@ GameObject:
   - component: {fileID: 6731208313074884971}
   - component: {fileID: 3457962585091912106}
   - component: {fileID: 7452273033708066856}
+  - component: {fileID: 932027439370833691}
   - component: {fileID: 5269001462004559404}
   m_Layer: 6
   m_Name: Player
@@ -836,7 +837,7 @@ MonoBehaviour:
   roomWidth: 6
   interactableLayer:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1024
   moveSpeed: 4
   sideSpeed: 10
   targetPosition: {x: 0, y: 0, z: 0}
@@ -845,12 +846,24 @@ MonoBehaviour:
   isMoving: 0
   isStopped: 1
   isMovementBlocked: 1
-  killStunDuration: 1
+  killStunDuration: 3
   isDead: 0
   raycastYOffset: {x: 0, y: 0.1, z: 0}
   PlayerDie:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: LoseUIManager, Assembly-CSharp
+        m_MethodName: SpawnLoseUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!136 &3457962585091912106
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -901,6 +914,26 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!114 &932027439370833691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2612773598277096328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69727bf8f858d3b4ca827ffa73d90f7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  invincibilityDuration: 3
+  maxDuration: 30
+  flickerSpeed: 0.3
+  invincibleColor: {r: 0, g: 1, b: 0.065570354, a: 1}
+  invincibleEffect: {fileID: 0}
+  spawnedInvincibleEffect: {fileID: 0}
+  invincibleMaterial: {fileID: 2100000, guid: 948d442040fd882428f3cb57efee8721, type: 2}
+  emissionIntensity: 5
 --- !u!114 &5269001462004559404
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1825,7 +1858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1445ab1a5b5a5d246826475e9f6eaaaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  killAngle: 120
+  killAngle: 120.5
   playerController: {fileID: 6731208313074884971}
 --- !u!65 &4405541221409837994
 BoxCollider:

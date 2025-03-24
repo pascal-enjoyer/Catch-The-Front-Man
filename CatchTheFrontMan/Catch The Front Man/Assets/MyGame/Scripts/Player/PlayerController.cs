@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     
     public PlayerAnimationManager animManager;
 
+
+
     public PlayerMovementState currentState;
     public Dictionary<PlayerMovementState, PlayerMovementState> antiPairs = 
         new Dictionary<PlayerMovementState, PlayerMovementState>
@@ -32,6 +34,7 @@ public class PlayerController : MonoBehaviour
     [Header("Kill Settings")]
     public float killStunDuration = 3f; // ������������ ����� ����� ��������
     private bool isStunned = false;     // ���� �����
+
 
     public bool isDead = false;
 
@@ -228,7 +231,6 @@ public class PlayerController : MonoBehaviour
         animManager.animator.enabled = false;
         PlayerDie.Invoke();
     }
-
 
 
 }

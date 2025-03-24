@@ -2,19 +2,14 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
-    [SerializeField] private Transform player; // Ссылка на игрока
-    [SerializeField] private Vector3 offset; // Смещение камеры относительно игрока
+    [SerializeField] private Transform player => PlayerManager.Instance.currentPlayer.transform; // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private Vector3 offset; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
     private void LateUpdate()
     {
         if (player == null) return;
-        // Камера следует за игроком только по оси Z
         Vector3 targetPosition = new Vector3(transform.position.x, transform.position.y, player.position.z + offset.z);
         transform.position = targetPosition;
     }
 
-    public void SetPlayer(Transform player)
-    {
-        this.player = player;
-    }
 }

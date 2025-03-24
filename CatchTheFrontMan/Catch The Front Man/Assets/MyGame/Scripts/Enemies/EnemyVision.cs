@@ -6,7 +6,7 @@ public class EnemyVision : MonoBehaviour
     [Range(0, 360)] public float viewAngle = 90f;
     public LayerMask targetMask;
     public LayerMask obstacleMask;
-    public GameObject player;
+    public GameObject player => PlayerManager.Instance.currentPlayer;
     public GameObject bulletPrefab;
     public Transform firePoint;
     public float fireRate = 1f;
@@ -14,31 +14,41 @@ public class EnemyVision : MonoBehaviour
     public float rotationSpeed = 5f;
     public bool GizmosOn = true;
     public PlayerAnimationManager animator;
+    public float shootDelay = 0.3f;
 
-    public float shootDelay = 0.3f; // Задержка перед стрельбой
+    [Header("Prediction Settings")]
+    [SerializeField] private float verticalOffset = 0.5f;
+    [SerializeField] private bool debugPrediction = false;
 
     private bool isDelaying = true;
     private float delayTimer = 0f;
     private float fireTimer = 0f;
     public bool IsPlayerVisible;
     private bool wasPlayerVisible = false;
-
     public bool isDead = false;
     public bool enemyTouchesPlayer = false;
 
-    private Collider _playerCollider; // Кэшируем коллайдер игрока
+    private Collider _playerCollider => player.GetComponent<Collider>();
+    private PlayerController _playerController => player.GetComponent<PlayerController>();
+    private Vector3 _lastPlayerPosition;
+    private Vector3 _calculatedVelocity;
 
     void Start()
     {
+
         if (player != null)
         {
-            _playerCollider = player.GetComponent<Collider>(); // Кэшируем коллайдер игрока
+            _lastPlayerPosition = player.transform.position;
         }
     }
 
     void Update()
     {
-        if (player == null || _playerCollider == null) return;
+        if (player == null || _playerCollider == null || isDead) return;
+
+        // Calculate custom velocity
+        _calculatedVelocity = (player.transform.position - _lastPlayerPosition) / Time.deltaTime;
+        _lastPlayerPosition = player.transform.position;
 
         CheckPlayerVisibility();
 
@@ -47,7 +57,6 @@ public class EnemyVision : MonoBehaviour
             RotateTowardsPlayer();
             animator.ChangeAnimation("Firing");
 
-            // Если игрок только что стал видимым — запускаем задержку
             if (!wasPlayerVisible)
             {
                 delayTimer = shootDelay;
@@ -80,7 +89,7 @@ public class EnemyVision : MonoBehaviour
                 animator.ChangeAnimation("Idle");
             }
             fireTimer = 0f;
-            isDelaying = true; // Сбрасываем задержку при потере видимости
+            isDelaying = true;
         }
 
         wasPlayerVisible = IsPlayerVisible;
@@ -88,11 +97,10 @@ public class EnemyVision : MonoBehaviour
 
     void RotateTowardsPlayer()
     {
-        Vector3 playerCenter = GetPlayerAimPoint(); // Получаем точку прицеливания
+        Vector3 playerCenter = GetPlayerAimPoint();
         Vector3 direction = (playerCenter - transform.position).normalized;
-
-        // Плавный поворот только по горизонтали
         direction.y = 0;
+
         Quaternion lookRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.Slerp(
             transform.rotation,
@@ -105,45 +113,101 @@ public class EnemyVision : MonoBehaviour
     {
         if (bulletPrefab && firePoint && player != null)
         {
-            Vector3 aimPoint = GetPlayerAimPoint();
+            Vector3 aimPoint = GetPredictedAimPoint();
             Vector3 direction = (aimPoint - firePoint.position).normalized;
+            if (_playerController.currentState != PlayerController.PlayerMovementState.center)
+            {
+                aimPoint = GetPlayerAimPoint();
+                direction = (aimPoint - firePoint.position).normalized;
+            }
+            // Визуализация
+            if (debugPrediction)
+            {
+                Debug.DrawLine(firePoint.position, aimPoint, Color.cyan, 1f);
+                Debug.DrawRay(aimPoint, Vector3.up * 2f, Color.red, 1f);
+            }
 
-            Quaternion bulletRotation = Quaternion.LookRotation(direction);
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, bulletRotation);
-
+            // Создание пули
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
             Bullet bulletComponent = bullet.GetComponent<Bullet>();
-            if (bulletComponent) bulletComponent.speed = bulletSpeed;
+
+            if (bulletComponent != null)
+            {
+                bulletComponent.Initialize(direction * bulletSpeed);
+            }
+            else
+            {
+                Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+                if (bulletRb) bulletRb.linearVelocity = direction * bulletSpeed;
+            }
+            if (debugPrediction)
+                Debug.Log($"Bullet speed: {bulletSpeed} | Direction: {direction}");
+        }
+    }
+
+    Vector3 GetPredictedAimPoint()
+    {
+        Vector3 targetPos = GetPlayerAimPoint();
+        Vector3 shooterPos = firePoint.position;
+        Vector3 targetVelocity = GetPredictionVelocity();
+
+        // Добавляем логирование для диагностики
+        if (debugPrediction)
+        {
+            Debug.Log($"PlayerState: {_playerController.currentState}");
+            Debug.Log($"Calculated Velocity: {_calculatedVelocity}");
+            Debug.Log($"Predicted Velocity: {targetVelocity}");
+        }
+
+        // Упрощенный физический расчет с приоритетом реальной скорости
+        float timeToTarget = Vector3.Distance(shooterPos, targetPos) / bulletSpeed;
+        return targetPos + targetVelocity * timeToTarget;
+    }
+
+
+    Vector3 GetPredictionVelocity()
+    {
+        // Всегда используем реальную скорость, если игрок движется
+        if (!_playerController.isStopped) return _calculatedVelocity;
+
+        // Только для специальных состояний
+        switch (_playerController.currentState)
+        {
+            case PlayerController.PlayerMovementState.left:
+                return Vector3.left * _playerController.moveSpeed;
+            case PlayerController.PlayerMovementState.right:
+                return Vector3.right * _playerController.moveSpeed;
+            case PlayerController.PlayerMovementState.down:
+                return Vector3.back * _playerController.moveSpeed;
+            default:
+                return _calculatedVelocity;
         }
     }
 
     Vector3 GetPlayerAimPoint()
     {
-        // Используем центр коллайдера игрока
-        if (_playerCollider != null)
+        if (_playerController.currentState == PlayerController.PlayerMovementState.down)
         {
-            return _playerCollider.bounds.center;
+            return _playerCollider.bounds.center + Vector3.up * verticalOffset;
         }
-        return player.transform.position; // На случай, если коллайдер отсутствует
+        return _playerCollider.bounds.center;
     }
 
     void CheckPlayerVisibility()
     {
         IsPlayerVisible = false;
-        if (player == null || isDead || player.GetComponent<PlayerController>().isDead) return;
+        if (player == null || isDead || _playerController.isDead) return;
 
         Vector3 aimPoint = GetPlayerAimPoint();
         Vector3 toPlayer = aimPoint - transform.position;
 
-        // 1. Проверка расстояния
         float sqrDistance = toPlayer.sqrMagnitude;
         if (sqrDistance > viewRadius * viewRadius) return;
 
-        // 2. Проверка угла обзора
         Vector3 directionToPlayer = toPlayer.normalized;
         if (Vector3.Dot(transform.forward, directionToPlayer) < Mathf.Cos(viewAngle * 0.5f * Mathf.Deg2Rad) && !enemyTouchesPlayer)
             return;
 
-        // 3. Проверка препятствий
         if (!Physics.Raycast(firePoint.position, directionToPlayer,
             out RaycastHit hit, Mathf.Sqrt(sqrDistance), obstacleMask) || enemyTouchesPlayer)
         {

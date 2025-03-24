@@ -7,6 +7,8 @@ public class GameSettings : MonoBehaviour
     public static GameSettings Instance;
     public GameController gameController;
 
+    
+
     [Header("Progress Settings")]
     public int currentLevel = 1;
     public int totalLevels = 10;

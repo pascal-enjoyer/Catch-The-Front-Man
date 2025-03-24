@@ -8,14 +8,26 @@ public class LoseUIManager : MonoBehaviour
 
     public PlayerReviver PlayerReviver;
 
+    private void Awake()
+    {
+        PlayerManager.PlayerChanged.AddListener(SetupLoseUI);
+    }
+
+    private void SetupLoseUI(GameObject newPlayer)
+    {
+
+        newPlayer.GetComponent<PlayerController>().PlayerDie.AddListener(SpawnLoseUI);
+
+    }
+
     public void SpawnLoseUI()
     {
         if (spawnedLoseUI == null)
         {
+            Debug.Log("asda");
             spawnedLoseUI = Instantiate(LoseUIprefab, transform);
             spawnedLoseUI.GetComponent<LoseUI>().PlayerRevived.AddListener(PlayerReviver.RevivePlayer);
             spawnedLoseUI.GetComponent<LoseUI>().PlayerRevived.AddListener(DestroyLoseUI);
-
         }
     }
 

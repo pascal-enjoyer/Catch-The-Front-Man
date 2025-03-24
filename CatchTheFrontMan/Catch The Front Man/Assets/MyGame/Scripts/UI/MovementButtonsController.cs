@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class MovementButtonsController : MonoBehaviour
 {
-    [SerializeField] private PlayerController playerController;
+    public PlayerController playerController => PlayerManager.Instance.currentPlayer.GetComponent<PlayerController>();
 
     public void OnLeftButtonPressed()
     {

@@ -6,6 +6,8 @@ public class BonusUIManager : MonoBehaviour
     public GameObject bonusElementPrefab; // Префаб элемента UI для бонуса
     public Transform bonusContainer; // Контейнер для бонусов
 
+
+
     public void SpawnBonusUI(Bonus bonus)
     {
         if (bonusElementPrefab == null || bonusContainer == null)

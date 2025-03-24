@@ -1,83 +1,212 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class CameraMovement : MonoBehaviour
 {
-    // Перечисление для состояний камеры
-    private enum CameraState
+    [System.Serializable]
+    public class CameraPoint
     {
-        Idle,           // Камера в покое
-        Waiting,        // Камера ждет перед началом движения
-        MovingToStart,  // Камера мгновенно перемещается на начальную позицию
-        MovingToEnd     // Камера плавно перемещается на конечную позицию
+        public Transform pointTransform;
+        public float moveDuration = 2f;
+        public float waitDuration = 0.5f;
+        [Tooltip("Р’РєР»СЋС‡РёС‚СЊ СЃРіР»Р°Р¶РёРІР°РЅРёРµ РїСЂРё РґРІРёР¶РµРЅРёРё Рє СЃР»РµРґСѓСЋС‰РµР№ С‚РѕС‡РєРµ")]
+        public bool useSmoothing = false;
+        [Tooltip("РЎРёР»Р° СЃРіР»Р°Р¶РёРІР°РЅРёСЏ (0.1-1)")]
+        [Range(0.1f, 1f)]
+        public float smoothness = 0.5f;
     }
 
-    [SerializeField] private Transform startPosition; // Начальная позиция камеры
-    [SerializeField] private Transform endPosition;   // Конечная позиция камеры
-    [SerializeField] private float moveSpeed = 1.0f;  // Скорость перемещения камеры
-    [SerializeField] private float delayBeforeMove = 2.0f; // Время ожидания перед началом движения
+    [Header("Path Settings")]
+    [SerializeField] private CameraPoint[] cameraPath;
+    [SerializeField] private float followTransitionDuration = 2f;
+    [SerializeField] private float playerStartDelay = 1f;
 
-    // Событие, вызываемое при достижении конечной точки
-    public UnityEvent<Vector3> onReachedEndPosition;
+    [Header("Follow Settings")]
+    [SerializeField] private Vector3 followOffset = new Vector3(0, 2, -5);
+    [SerializeField] private float cameraTiltAngle = 10f;
+    [SerializeField] private float followSmoothness = 5f;
 
-    private CameraState currentState = CameraState.Idle;
-    private Transform cameraTransform;
-    private float waitTimer;
+    [Header("Events")]
+    public UnityEvent OnPathComplete;
+
+    private Transform _target;
+    private PlayerController _playerController;
+    private bool _isFollowingPlayer;
+    private bool _isTransitioning;
+
+    private void Awake()
+    {
+        PlayerManager.PlayerChanged.AddListener((GameObject newPlayer) =>
+        {
+            _target = newPlayer.transform;
+            _playerController = newPlayer.GetComponent<PlayerController>();
+        });
+    }
 
     private void Start()
     {
-        cameraTransform = Camera.main.transform;
-        StartCameraMovement();
+        if (cameraPath.Length > 0)
+        {
+            StartCoroutine(FollowCameraPath());
+        }
+        else
+        {
+            StartFollowingPlayer();
+            StartCoroutine(DelayedPlayerStart());
+        }
+    }
+    private IEnumerator FollowCameraPath()
+    {
+        if (cameraPath.Length == 0) yield break;
+
+        transform.SetPositionAndRotation(
+            cameraPath[0].pointTransform.position,
+            cameraPath[0].pointTransform.rotation
+        );
+        yield return new WaitForSeconds(cameraPath[0].waitDuration);
+
+        for (int i = 1; i < cameraPath.Length; i++)
+        {
+            CameraPoint prevPoint = cameraPath[i - 1];
+            CameraPoint currentPoint = cameraPath[i];
+
+            float t = 0;
+            Vector3 startPos = transform.position;
+            Quaternion startRot = transform.rotation;
+
+            while (t < 1f)
+            {
+                t += Time.deltaTime / prevPoint.moveDuration;
+
+                // РџСЂРёРјРµРЅСЏРµРј СЃРіР»Р°Р¶РёРІР°РЅРёРµ РµСЃР»Рё РІРєР»СЋС‡РµРЅРѕ
+                float smoothedT = prevPoint.useSmoothing ?
+                    Mathf.SmoothStep(0, 1, t) :
+                    t;
+
+                transform.position = Vector3.Lerp(
+                    startPos,
+                    currentPoint.pointTransform.position,
+                    prevPoint.useSmoothing ? smoothedT * prevPoint.smoothness : t
+                );
+
+                transform.rotation = Quaternion.Slerp(
+                    startRot,
+                    currentPoint.pointTransform.rotation,
+                    prevPoint.useSmoothing ? smoothedT * prevPoint.smoothness : t
+                );
+
+                yield return null;
+            }
+            yield return new WaitForSeconds(currentPoint.waitDuration);
+        }
+
+        _isTransitioning = true;
+        yield return TransitionToPlayer(cameraPath[^1].useSmoothing, cameraPath[^1].smoothness);
+        _isTransitioning = false;
+
+        OnPathComplete?.Invoke();
+
+        yield return new WaitForSeconds(playerStartDelay);
+        StartPlayerMovement();
+    }
+    private IEnumerator TransitionToPlayer(bool useSmoothing = false, float smoothness = 0.5f)
+    {
+        float t = 0;
+        Vector3 startPos = transform.position;
+        Quaternion startRot = transform.rotation;
+        Vector3 targetPos = CalculateFollowPosition();
+        Quaternion targetRot = CalculateFollowRotation();
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime / followTransitionDuration;
+
+            // РџСЂРёРјРµРЅСЏРµРј СЃРіР»Р°Р¶РёРІР°РЅРёРµ, РµСЃР»Рё РІРєР»СЋС‡РµРЅРѕ
+            float smoothedT = useSmoothing ? Mathf.SmoothStep(0, 1, t) : t;
+
+            transform.position = Vector3.Lerp(startPos, targetPos, smoothedT);
+            transform.rotation = Quaternion.Slerp(startRot, targetRot, smoothedT);
+
+            yield return null;
+        }
+
+        StartFollowingPlayer(); // РђРєС‚РёРІРёСЂСѓРµРј СЂРµР¶РёРј СЃР»РµРґРѕРІР°РЅРёСЏ РїРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ РїРµСЂРµС…РѕРґР°
     }
 
-    private void Update()
+    private Vector3 CalculateFollowPosition()
     {
-        // Обработка состояний камеры
-        switch (currentState)
+        return _target.position
+            + _target.forward * followOffset.z // РСЃРїСЂР°РІР»РµРЅРѕ: С‚РµРїРµСЂСЊ + РґР»СЏ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹С… Р·РЅР°С‡РµРЅРёР№ Z
+            + _target.up * followOffset.y
+            + _target.right * followOffset.x;
+    }
+
+    private Quaternion CalculateFollowRotation()
+    {
+        // РћСЃРЅРѕРІРЅРѕРµ РЅР°РїСЂР°РІР»РµРЅРёРµ - РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РёРіСЂРѕРє
+        Quaternion baseRotation = _target.rotation;
+
+        // Р”РѕР±Р°РІР»СЏРµРј РЅР°РєР»РѕРЅ РєР°РјРµСЂС‹
+        return baseRotation * Quaternion.Euler(cameraTiltAngle, 0, 0);
+    }
+
+    private void StartFollowingPlayer()
+    {
+        _isFollowingPlayer = true;
+    }
+
+    private void StartPlayerMovement()
+    {
+        if (_playerController != null)
         {
-            case CameraState.Waiting:
-                cameraTransform.position = startPosition.position;
-                // Ожидание перед началом движения
-                waitTimer -= Time.deltaTime;
-                if (waitTimer <= 0)
-                {
-                    currentState = CameraState.MovingToStart;
-                }
-                break;
-
-            case CameraState.MovingToStart:
-                // Мгновенное перемещение на начальную позицию
-                cameraTransform.position = startPosition.position;
-                cameraTransform.rotation = startPosition.rotation;
-                currentState = CameraState.MovingToEnd;
-                break;
-
-            case CameraState.MovingToEnd:
-                // Плавное перемещение на конечную позицию
-                cameraTransform.position = Vector3.Lerp(cameraTransform.position, endPosition.position, moveSpeed * Time.deltaTime);
-                cameraTransform.rotation = Quaternion.Lerp(cameraTransform.rotation, endPosition.rotation, moveSpeed * Time.deltaTime);
-
-                // Проверка на завершение перемещения
-                if (Vector3.Distance(cameraTransform.position, endPosition.position) < 0.01f)
-                {
-                    cameraTransform.position = endPosition.position; // Точное позиционирование
-                    cameraTransform.rotation = endPosition.rotation;
-                    currentState = CameraState.Idle;
-
-                    // Вызов события с передачей позиции камеры
-                    onReachedEndPosition?.Invoke(cameraTransform.position);
-                }
-                break;
+            _playerController.StartMovingForward();
         }
     }
 
-    // Метод для запуска движения камеры
-    public void StartCameraMovement()
+    private void LateUpdate()
     {
-        if (currentState == CameraState.Idle)
+        if (!_isFollowingPlayer || _isTransitioning || _target == null) return;
+
+        transform.position = Vector3.Lerp(
+            transform.position,
+            CalculateFollowPosition(),
+            followSmoothness * Time.deltaTime
+        );
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            CalculateFollowRotation(),
+            followSmoothness * Time.deltaTime
+        );
+    }
+
+    private IEnumerator DelayedPlayerStart()
+    {
+        yield return new WaitForSeconds(playerStartDelay);
+        StartPlayerMovement();
+    }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        if (cameraPath == null || cameraPath.Length < 1) return;
+
+        Gizmos.color = Color.cyan;
+        for (int i = 0; i < cameraPath.Length; i++)
         {
-            currentState = CameraState.Waiting;
-            waitTimer = delayBeforeMove;
+            if (cameraPath[i].pointTransform == null) continue;
+
+            Gizmos.DrawSphere(cameraPath[i].pointTransform.position, 0.3f);
+
+            if (i < cameraPath.Length - 1 && cameraPath[i + 1].pointTransform != null)
+            {
+                Gizmos.DrawLine(
+                    cameraPath[i].pointTransform.position,
+                    cameraPath[i + 1].pointTransform.position
+                );
+            }
         }
     }
+#endif
 }
