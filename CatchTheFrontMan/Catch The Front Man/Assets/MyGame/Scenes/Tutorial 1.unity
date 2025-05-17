@@ -3631,6 +3631,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: end level point
       objectReference: {fileID: 0}
+    - target: {fileID: 5871796286626315198, guid: 9348474ecb06cc545b7862b25014d046, type: 3}
+      propertyPath: spawnPointPairs.Array.data[0].bonusPrefab
+      value: 
+      objectReference: {fileID: 11400000, guid: ff46aea9250c5934484c191d4dda594d, type: 2}
     - target: {fileID: 6080543980235835647, guid: 9348474ecb06cc545b7862b25014d046, type: 3}
       propertyPath: enemiesData.Array.data[0].spawnPoint
       value: 
@@ -3665,11 +3669,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6080543980235835647, guid: 9348474ecb06cc545b7862b25014d046, type: 3}
       propertyPath: enemiesData.Array.data[0].patrolWaypoints.Array.data[1].maxWaitTime
-      value: 12
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6080543980235835647, guid: 9348474ecb06cc545b7862b25014d046, type: 3}
       propertyPath: enemiesData.Array.data[0].patrolWaypoints.Array.data[1].minWaitTime
-      value: 10
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7723119400352239896, guid: 9348474ecb06cc545b7862b25014d046, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4895,6 +4899,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4749039987383117088, guid: ad2ba97a26fa31f429fa8e73f15c2ac8, type: 3}
+      propertyPath: dialogData
+      value: 
+      objectReference: {fileID: 11400000, guid: 6e0dc80cbb637b84f8e63015de45fe9f, type: 2}
     - target: {fileID: 4749039987383117088, guid: ad2ba97a26fa31f429fa8e73f15c2ac8, type: 3}
       propertyPath: dialogManager
       value: 

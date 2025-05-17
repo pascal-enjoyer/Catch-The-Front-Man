@@ -18,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public PlayerAnimationManager animManager;
 
     public PlayerMovementState currentState;
+    private PlayerMovementState pendingState; // Track intended state during transitions
 
     public Dictionary<PlayerMovementState, PlayerMovementState> antiPairs =
         new Dictionary<PlayerMovementState, PlayerMovementState>
@@ -30,8 +31,8 @@ public class PlayerController : MonoBehaviour
     public bool isMoving = false;
     public bool isStopped = true;
     public bool isMovementBlocked = true;
-    private bool lockHoldInputs = false; // New flag to lock hold inputs after center return
     private bool shouldStartCrawling = false; // Flag to start crawling after prone transition
+    private bool ignoreClicksAfterHold = false; // Flag to ignore clicks after hold release
 
     [Header("Kill Settings")]
     public float killStunDuration = 3f;
@@ -60,6 +61,7 @@ public class PlayerController : MonoBehaviour
         DeathTimer.OnTimerEnded += OnDeathTimerEnded;
         EventManager.OnDialogStarted += OnDialogStarted;
         EventManager.OnDialogEnded += OnDialogEnded;
+        pendingState = PlayerMovementState.center; // Initialize to center
     }
 
     private void OnDestroy()
@@ -91,7 +93,6 @@ public class PlayerController : MonoBehaviour
                 isMovingAlongWall = true;
                 animManager.ChangeAnimation("Wall Move");
             }
-            // Move along the wall in world forward direction
             transform.position += Vector3.forward * wallMoveSpeed * Time.deltaTime;
         }
         else if (isMovingAlongWall)
@@ -132,27 +133,23 @@ public class PlayerController : MonoBehaviour
         if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
         {
             isMoving = false;
+            currentState = pendingState; // Update state when transition completes
             if (currentState == PlayerMovementState.center)
             {
                 isStopped = false;
-                lockHoldInputs = false; // Clear hold input lock
-                Debug.Log("Reached center, lockHoldInputs cleared");
             }
             else if (currentState == PlayerMovementState.left && isLeftHeld)
             {
-                // Start moving along left wall if button is still held
                 isMovingAlongWall = true;
                 animManager.ChangeAnimation("Wall Move");
             }
             else if (currentState == PlayerMovementState.right && isRightHeld)
             {
-                // Start moving along right wall if button is still held
                 isMovingAlongWall = true;
                 animManager.ChangeAnimation("Wall Move");
             }
             else if (currentState == PlayerMovementState.down && shouldStartCrawling && isDownHeld)
             {
-                // Start crawling if down button is held after prone transition
                 isCrawling = true;
                 shouldStartCrawling = false;
                 animManager.ChangeAnimation("Crawl");
@@ -171,12 +168,10 @@ public class PlayerController : MonoBehaviour
     {
         isStunned = true;
         animManager.ChangeAnimation("Stab");
-        Debug.Log("Kill stun started");
 
         yield return new WaitForSeconds(killStunDuration);
 
         isStunned = false;
-        Debug.Log("Kill stun ended");
 
         if (!isMovementBlocked && !isStopped)
             animManager.ChangeAnimation("Crouch Walk");
@@ -193,7 +188,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnDownButtonClicked()
     {
-        if (!isDownHeld && ShouldSkipUpdate() == false) // Only trigger if not holding
+        if (!isDownHeld && ShouldSkipUpdate() == false)
         {
             SetProneState();
         }
@@ -216,26 +211,34 @@ public class PlayerController : MonoBehaviour
 
     private void SetProneState()
     {
+        pendingState = PlayerMovementState.down;
         targetPosition = new Vector3(0, transform.position.y, transform.position.z);
         SetColliderSettings(2, new Vector3(0, 0.2f, 0));
         transform.rotation = Quaternion.identity;
         animManager.ChangeAnimation("Floor Lie");
         isStopped = true;
         isMoving = true;
-        currentState = PlayerMovementState.down;
     }
 
-    private void HandleCommonMovement(PlayerMovementState newState, Vector3 direction, float yRotation)
+    private void HandleCommonMovement(PlayerMovementState newState, Vector3 direction, float yRotation, bool isHold = false)
     {
         if (ShouldSkipUpdate()) return;
 
         if (antiPairs.ContainsKey(newState) && currentState == antiPairs[newState])
         {
-            lockHoldInputs = true; // Lock hold inputs during center transition
-            Debug.Log($"Returning to center from {currentState}, setting lockHoldInputs = true");
+            // Lock clicks after hold to prevent OnPointerUp triggering movement
+            if (isHold)
+            {
+                ignoreClicksAfterHold = true;
+            }
+            // Clear hold inputs to prevent immediate re-trigger
+            if (newState == PlayerMovementState.left)
+                isLeftHeld = false;
+            else if (newState == PlayerMovementState.right)
+                isRightHeld = false;
             ReturnToCenter();
         }
-        else if (currentState != newState && CastRay(direction))
+        else if (currentState != newState && (!isHold || !isMoving) && CastRay(direction))
         {
             MoveToWall(newState, yRotation);
         }
@@ -243,15 +246,15 @@ public class PlayerController : MonoBehaviour
 
     private void ReturnToCenter()
     {
+        pendingState = PlayerMovementState.center;
         targetPosition = new Vector3(0, transform.position.y, transform.position.z);
-        currentState = PlayerMovementState.center;
         SetColliderSettings(1, new Vector3(0, 0.785f, 0));
         transform.rotation = Quaternion.identity;
         animManager.ChangeAnimation("Crouch Walk");
         isMoving = true;
         isStopped = true;
         isMovingAlongWall = false;
-        isLeftHeld = false; // Clear hold states to prevent immediate re-trigger
+        isLeftHeld = false;
         isRightHeld = false;
         isCrawling = false;
         isDownHeld = false;
@@ -260,13 +263,12 @@ public class PlayerController : MonoBehaviour
 
     private void MoveToWall(PlayerMovementState state, float rotationY)
     {
-        currentState = state;
+        pendingState = state;
         SetColliderSettings(1, new Vector3(0, 0.785f, 0));
         transform.rotation = Quaternion.Euler(0, rotationY, 0);
         animManager.ChangeAnimation("Wall Lean");
         isStopped = true;
         isMoving = true;
-        // Target position is set by CastRay
     }
 
     private void SetColliderSettings(int direction, Vector3 center)
@@ -278,7 +280,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnLeftButtonClicked()
     {
-        if (!isLeftHeld && ShouldSkipUpdate() == false) // Only trigger if not holding
+        if (!isLeftHeld && !ignoreClicksAfterHold && !isMoving && pendingState != PlayerMovementState.center && ShouldSkipUpdate() == false)
         {
             HandleCommonMovement(PlayerMovementState.left, Vector3.left, 90f);
         }
@@ -286,7 +288,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnRightButtonClicked()
     {
-        if (!isRightHeld && ShouldSkipUpdate() == false) // Only trigger if not holding
+        if (!isRightHeld && !ignoreClicksAfterHold && !isMoving && pendingState != PlayerMovementState.center && ShouldSkipUpdate() == false)
         {
             HandleCommonMovement(PlayerMovementState.right, Vector3.right, -90f);
         }
@@ -295,20 +297,36 @@ public class PlayerController : MonoBehaviour
     public void OnLeftButtonHeld(bool isHeld)
     {
         isLeftHeld = isHeld;
-        if (isHeld && currentState != PlayerMovementState.left && !lockHoldInputs && !isMoving && ShouldSkipUpdate() == false)
+        if (isHeld && currentState != PlayerMovementState.left && ShouldSkipUpdate() == false)
         {
-            Debug.Log("Left button held, initiating wall movement");
-            HandleCommonMovement(PlayerMovementState.left, Vector3.left, 90f);
+            HandleCommonMovement(PlayerMovementState.left, Vector3.left, 90f, true);
         }
     }
 
     public void OnRightButtonHeld(bool isHeld)
     {
         isRightHeld = isHeld;
-        if (isHeld && currentState != PlayerMovementState.right && !lockHoldInputs && !isMoving && ShouldSkipUpdate() == false)
+        if (isHeld && currentState != PlayerMovementState.right && ShouldSkipUpdate() == false)
         {
-            Debug.Log("Right button held, initiating wall movement");
-            HandleCommonMovement(PlayerMovementState.right, Vector3.right, -90f);
+            HandleCommonMovement(PlayerMovementState.right, Vector3.right, -90f, true);
+        }
+    }
+
+    public void OnLeftButtonReleased()
+    {
+        isLeftHeld = false;
+        if (currentState == PlayerMovementState.center && !isMoving)
+        {
+            ignoreClicksAfterHold = false; // Only clear when stable in center
+        }
+    }
+
+    public void OnRightButtonReleased()
+    {
+        isRightHeld = false;
+        if (currentState == PlayerMovementState.center && !isMoving)
+        {
+            ignoreClicksAfterHold = false; // Only clear when stable in center
         }
     }
 
@@ -317,7 +335,7 @@ public class PlayerController : MonoBehaviour
         isDownHeld = isHeld;
         if (isHeld && currentState != PlayerMovementState.down && ShouldSkipUpdate() == false)
         {
-            shouldStartCrawling = true; // Flag to start crawling after prone transition
+            shouldStartCrawling = true;
             SetProneState();
         }
         else if (currentState == PlayerMovementState.down && !isMoving)
@@ -333,6 +351,7 @@ public class PlayerController : MonoBehaviour
         isMoving = false;
         isStopped = false;
         currentState = PlayerMovementState.center;
+        pendingState = PlayerMovementState.center;
         targetPosition = new Vector3(0, transform.position.y, transform.position.z);
         transform.rotation = Quaternion.identity;
         SetColliderSettings(1, new Vector3(0, 0.785f, 0));
@@ -370,6 +389,7 @@ public class PlayerController : MonoBehaviour
         isDead = false;
         animManager.animator.enabled = true;
         currentState = state;
+        pendingState = state;
         targetPosition = savedTargetPosition;
 
         switch (state)
@@ -414,13 +434,11 @@ public class PlayerController : MonoBehaviour
         if (invincibility != null && !isDead)
         {
             invincibility.ActivateInvincibility(3f);
-            Debug.Log("PlayerController: DeathTimer ended, invincibility activated.");
         }
     }
 
     private void OnDialogStarted()
     {
-        Debug.Log("PlayerController: OnDialogStarted called.");
         isMovementBlocked = true;
         isMoving = false;
         isStopped = true;
@@ -429,23 +447,20 @@ public class PlayerController : MonoBehaviour
         isLeftHeld = false;
         isRightHeld = false;
         isDownHeld = false;
-        lockHoldInputs = false;
         shouldStartCrawling = false;
+        ignoreClicksAfterHold = false;
         animManager.ChangeAnimation("idle");
     }
 
     private void OnDialogEnded()
     {
-        Debug.Log("PlayerController: OnDialogEnded called.");
         // Movement will be restored in CameraMovement after camera returns
     }
 
     public void RestoreStateAfterDialog()
     {
-        Debug.Log($"PlayerController: Restoring state after dialog, currentState: {currentState}");
         if (animManager == null)
         {
-            Debug.LogError("PlayerController: animManager is null during RestoreStateAfterDialog.", this);
             return;
         }
 
@@ -457,20 +472,17 @@ public class PlayerController : MonoBehaviour
                 animManager.ChangeAnimation("Crouch Walk");
                 isStopped = false;
                 isMoving = false;
-                Debug.Log("PlayerController: Restored Crouch Walk, isStopped = false, isMoving = false");
                 break;
             case PlayerMovementState.left:
             case PlayerMovementState.right:
                 animManager.ChangeAnimation("Wall Lean");
                 isStopped = true;
                 isMoving = false;
-                Debug.Log("PlayerController: Restored Wall Lean, isStopped = true, isMoving = false");
                 break;
             case PlayerMovementState.down:
                 animManager.ChangeAnimation("Floor Lie");
                 isStopped = true;
                 isMoving = false;
-                Debug.Log("PlayerController: Restored Floor Lie, isStopped = true, isMoving = false");
                 break;
         }
     }
