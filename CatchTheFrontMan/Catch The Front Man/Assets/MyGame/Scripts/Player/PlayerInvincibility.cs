@@ -13,9 +13,11 @@ public class PlayerInvincibility : MonoBehaviour
     [Header("Effects")]
     public GameObject invincibleEffect;
     public GameObject spawnedInvincibleEffect;
+
     [Header("Material Settings")]
     [SerializeField] private Material invincibleMaterial;
     [SerializeField] private float emissionIntensity = 5f;
+
     private List<Renderer> _childRenderers = new List<Renderer>();
     private List<Material[]> _originalMaterials = new List<Material[]>();
     private Material _invincibleMaterial;
@@ -31,7 +33,6 @@ public class PlayerInvincibility : MonoBehaviour
 
         foreach (var renderer in _childRenderers)
         {
-            // Создаем копии материалов для каждого рендерера
             Material[] mats = new Material[renderer.materials.Length];
             for (int i = 0; i < mats.Length; i++)
             {
@@ -40,11 +41,9 @@ public class PlayerInvincibility : MonoBehaviour
             _originalMaterials.Add(mats);
         }
 
-        // Убедитесь что материал назначен в инспекторе
         if (invincibleMaterial == null)
             Debug.LogError("Assign Invincible Material in inspector!");
     }
-
 
     void Update()
     {
@@ -77,11 +76,9 @@ public class PlayerInvincibility : MonoBehaviour
 
     private void StartVisualEffects()
     {
-        // Запускаем мерцание
         if (_flickerCoroutine != null) StopCoroutine(_flickerCoroutine);
         _flickerCoroutine = StartCoroutine(FlickerRoutine());
 
-        // Дополнительные эффекты
         if (invincibleEffect != null)
         {
             spawnedInvincibleEffect = Instantiate(invincibleEffect, transform);
@@ -147,7 +144,6 @@ public class PlayerInvincibility : MonoBehaviour
 
     void OnDestroy()
     {
-        // Чистим материалы
         if (_invincibleMaterial != null)
         {
             Destroy(_invincibleMaterial);

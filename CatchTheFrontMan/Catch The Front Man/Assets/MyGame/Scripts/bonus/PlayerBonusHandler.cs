@@ -7,7 +7,6 @@ public class PlayerBonusHandler : MonoBehaviour
 
     public void AcquireBuff(GameObject buffPrefab)
     {
-        // Получаем компонент Bonus из префаба
         var prefabBonus = buffPrefab.GetComponent<Bonus>();
         if (prefabBonus == null)
         {
@@ -15,16 +14,15 @@ public class PlayerBonusHandler : MonoBehaviour
             return;
         }
 
-        // Создаем новый компонент на игроке
+        // Создаем экземпляр бонуса
         var buffInstance = gameObject.AddComponent(prefabBonus.GetType()) as Bonus;
 
-        // Копируем данные из префаба в новый компонент
-        buffInstance.SetData(prefabBonus.Data);
+        // Копируем данные из префаба
+        buffInstance.CopyFrom(prefabBonus);
 
-        // Инициализируем бонус
+        // Инициализируем
         buffInstance.Initialize(gameObject);
 
-        // Вызываем событие
         BonusActivated?.Invoke(buffInstance);
     }
 }

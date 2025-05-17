@@ -24,7 +24,6 @@ public class LoseUIManager : MonoBehaviour
     {
         if (spawnedLoseUI == null)
         {
-            Debug.Log("asda");
             spawnedLoseUI = Instantiate(LoseUIprefab, transform);
             spawnedLoseUI.GetComponent<LoseUI>().PlayerRevived.AddListener(PlayerReviver.RevivePlayer);
             spawnedLoseUI.GetComponent<LoseUI>().PlayerRevived.AddListener(DestroyLoseUI);

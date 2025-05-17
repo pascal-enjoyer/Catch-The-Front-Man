@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &270417542743601030
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 410218960353969623}
+  - component: {fileID: 1331669256968486900}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!4 &410218960353969623
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270417542743601030}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.22354363, y: 1.1662432, z: 13.0308275}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1331669256968486900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 270417542743601030}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb13fcc2e55326548a97142d4e01197f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: DollRedLight
+    clip: {fileID: 8300000, guid: 0b3d82a39c5d63d4087a3f2351419334, type: 3}
+    volume: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: DollGreenLight
+    clip: {fileID: 8300000, guid: e801f07064d3bc2458af5b52ec3f2933, type: 3}
+    volume: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: SuitDown
+    clip: {fileID: 8300000, guid: 528b9e0d39bb1e942b6707db49178c9e, type: 3}
+    volume: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: SuitUp
+    clip: {fileID: 8300000, guid: d8061d37b77c4864c8a4a075290032fd, type: 3}
+    volume: 1
+    loop: 0
+    source: {fileID: 0}

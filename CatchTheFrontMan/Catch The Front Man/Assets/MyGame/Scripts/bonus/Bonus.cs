@@ -38,7 +38,11 @@ public abstract class Bonus : MonoBehaviour
         ApplyEffect(false);
         Destroy(this);
     }
-
+    public virtual void CopyFrom(Bonus source)
+    {
+        this.data = source.Data;
+        // Добавьте копирование общих полей, если они есть
+    }
     protected abstract void ApplyEffect(bool activate);
     protected virtual void UpdateEffect() { }
 }

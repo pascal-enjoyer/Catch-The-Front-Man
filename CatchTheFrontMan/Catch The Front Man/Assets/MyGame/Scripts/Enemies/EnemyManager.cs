@@ -11,14 +11,17 @@ public class EnemyManager : MonoBehaviour
     [System.Serializable]
     public class EnemySpawnData
     {
-        public GameObject enemyPrefab;      // Префаб врага
-        public Waypoint[] patrolWaypoints; // Набор точек пути для патрулирования
-        public Transform spawnPoint;       // Точка спавна (опционально)
+        public GameObject enemyPrefab;
+        public Waypoint[] patrolWaypoints;
+        public Transform spawnPoint;
         public PatrolType patrolType;
     }
 
     [Header("Enemy Spawn Settings")]
-    public EnemySpawnData[] enemiesData;   // Массив данных для спавна врагов
+    public EnemySpawnData[] enemiesData;
+
+    private List<GameObject> spawnedEnemies = new List<GameObject>();
+    public List<GameObject> SpawnedEnemies => spawnedEnemies;
 
     private void Awake()
     {
@@ -34,18 +37,25 @@ public class EnemyManager : MonoBehaviour
         {
             player = newPlayer;
         });
+
+        // Подписываемся на события DeathTimer
+        DeathTimer.OnTimerStarted += OnDeathTimerStarted;
+        DeathTimer.OnTimerEnded += OnDeathTimerEnded;
     }
 
-    private List<GameObject> spawnedEnemies = new List<GameObject>();
-    public List<GameObject>  SpawnedEnemies => spawnedEnemies;
+    private void OnDestroy()
+    {
+        // Отписываемся от событий DeathTimer
+        DeathTimer.OnTimerStarted -= OnDeathTimerStarted;
+        DeathTimer.OnTimerEnded -= OnDeathTimerEnded;
+    }
 
-
-    void Start()
+    private void Start()
     {
         SpawnAllEnemies();
     }
 
-    void SpawnAllEnemies()
+    private void SpawnAllEnemies()
     {
         foreach (EnemySpawnData data in enemiesData)
         {
@@ -55,12 +65,10 @@ public class EnemyManager : MonoBehaviour
                 continue;
             }
 
-            // Определяем позицию спавна
             Vector3 spawnPosition = data.spawnPoint != null ?
                 data.spawnPoint.position :
                 GetFirstWaypointPosition(data.patrolWaypoints);
 
-            // Создаем экземпляр врага
             GameObject enemy = Instantiate(
                 data.enemyPrefab,
                 spawnPosition,
@@ -68,14 +76,13 @@ public class EnemyManager : MonoBehaviour
                 transform
             );
 
-            // Настраиваем патрулирование
             SetupEnemyPatrol(enemy, data.patrolWaypoints, data.patrolType);
 
             spawnedEnemies.Add(enemy);
         }
     }
 
-    Vector3 GetFirstWaypointPosition(Waypoint[] waypoints)
+    private Vector3 GetFirstWaypointPosition(Waypoint[] waypoints)
     {
         if (waypoints == null || waypoints.Length == 0)
         {
@@ -85,7 +92,7 @@ public class EnemyManager : MonoBehaviour
         return waypoints[0].point.position;
     }
 
-    void SetupEnemyPatrol(GameObject enemy, Waypoint[] waypoints, PatrolType patrolType)
+    private void SetupEnemyPatrol(GameObject enemy, Waypoint[] waypoints, PatrolType patrolType)
     {
         EnemyPatrol patrol = enemy.GetComponent<EnemyPatrol>();
         if (patrol == null)
@@ -109,5 +116,37 @@ public class EnemyManager : MonoBehaviour
         }
         spawnedEnemies.Clear();
         SpawnAllEnemies();
+    }
+
+    private void OnDeathTimerStarted()
+    {
+        Debug.Log("EnemyManager: DeathTimer started. All enemies paused.");
+        foreach (GameObject enemy in spawnedEnemies)
+        {
+            if (enemy != null)
+            {
+                Enemy enemyComponent = enemy.GetComponent<Enemy>();
+                if (enemyComponent != null)
+                {
+                    Debug.Log($"Enemy {enemy.name} paused: IsActive={enemyComponent.IsActive}");
+                }
+            }
+        }
+    }
+
+    private void OnDeathTimerEnded()
+    {
+        Debug.Log("EnemyManager: DeathTimer ended. All enemies resumed.");
+        foreach (GameObject enemy in spawnedEnemies)
+        {
+            if (enemy != null)
+            {
+                Enemy enemyComponent = enemy.GetComponent<Enemy>();
+                if (enemyComponent != null)
+                {
+                    Debug.Log($"Enemy {enemy.name} resumed: IsActive={enemyComponent.IsActive}");
+                }
+            }
+        }
     }
 }

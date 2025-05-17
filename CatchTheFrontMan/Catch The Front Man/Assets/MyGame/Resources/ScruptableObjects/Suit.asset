@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: d7a4df56ef09c634dbec2631a632116c, type: 3}
   color: {r: 1, g: 1, b: 1, a: 1}
-  duration: 5
+  duration: 10
   bonusPrefab: {fileID: 6054377265588855335, guid: b3ae8bda3697c4348af6d2bba62bd95c, type: 3}

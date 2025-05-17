@@ -30,23 +30,20 @@ public class EnemyPatrol : MonoBehaviour
     private Quaternion targetRotation;
     private bool isMovingForward = true;
     private EnemyVision enemyVision;
-
-    public bool isDead = false;
-
+    private Enemy enemy;
 
     public enum PatrolType { Loop, PingPong }
 
     void Start()
     {
         enemyVision = GetComponent<EnemyVision>();
+        enemy = GetComponent<Enemy>();
         if (waypoints.Length > 0)
         {
             if (waypoints[currentWaypointIndex] != null)
             {
                 targetPosition = waypoints[currentWaypointIndex].point.position;
                 transform.position = targetPosition;
-
-                // Добавляем принудительный поворот к точке при старте
                 RotateImmediatelyToTarget();
             }
 
@@ -58,9 +55,14 @@ public class EnemyPatrol : MonoBehaviour
         }
     }
 
+    private bool IsEnemyAbleToDoSomething()
+    {
+        return enemy.IsActive;
+    }
+
     void Update()
     {
-        if (isDead) return;
+        if (!IsEnemyAbleToDoSomething()) return;
         if (enemyVision != null && enemyVision.IsPlayerVisible)
         {
             if (isWaiting)
@@ -70,7 +72,6 @@ public class EnemyPatrol : MonoBehaviour
             return;
         }
 
-        // Разрешаем поворот даже при одной точке
         if (waypoints.Length == 1)
         {
             HandleSingleWaypoint();
@@ -92,10 +93,7 @@ public class EnemyPatrol : MonoBehaviour
 
     void HandleSingleWaypoint()
     {
-        // Поворачиваемся к точке даже если она одна
         RotateTowardsTarget();
-
-        // Обработка ожидания с поворотом
         if (isWaiting)
         {
             HandleWaiting();
@@ -117,7 +115,6 @@ public class EnemyPatrol : MonoBehaviour
 
     void MoveToWaypoint()
     {
-        // Двигаемся только если есть куда двигаться
         if (waypoints.Length <= 1 || currentWaypointIndex >= waypoints.Length)
             return;
 
@@ -127,7 +124,6 @@ public class EnemyPatrol : MonoBehaviour
             moveSpeed * Time.deltaTime
         );
 
-        // Обновляем анимацию только если есть куда двигаться
         if (enemyVision == null || !enemyVision.IsPlayerVisible)
             animator.ChangeAnimation("Walk");
         if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
@@ -144,7 +140,6 @@ public class EnemyPatrol : MonoBehaviour
             }
         }
     }
-
 
     void StartWaiting()
     {
@@ -170,7 +165,6 @@ public class EnemyPatrol : MonoBehaviour
             return;
         }
 
-        // Для случая с одной точкой - постоянный idle
         if (waypoints.Length == 1)
         {
             animator.ChangeAnimation("Idle");
@@ -252,13 +246,4 @@ public class EnemyPatrol : MonoBehaviour
             }
         }
     }
-
-    public void Die()
-    {
-        isDead = true;
-        enemyVision.isDead = true;
-        animator.ChangeAnimation("Die");
-    }
-
-    
 }
