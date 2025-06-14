@@ -8,6 +8,8 @@ public class ObjectsThrowZone : MonoBehaviour
     [SerializeField] private float throwForce = 10f; // Force to apply when throwing
     [SerializeField] private float upwardForce = 5f; // Upward force for arc trajectory
     [SerializeField] private LayerMask iconLayerMask; // Layer mask for icon raycast detection
+    [SerializeField] private float sphereCastRadius = 2f; // Radius for sphere cast on collision
+    [SerializeField] private LayerMask hearableMask; // Layer mask for objects with IObjectsHear
 
     private SphereCollider zoneCollider;
     private Camera mainCamera;
@@ -29,6 +31,8 @@ public class ObjectsThrowZone : MonoBehaviour
             Debug.LogError("Main Camera not found!", this);
         if (iconLayerMask.value == 0)
             Debug.LogWarning("Icon Layer Mask is not set! Raycasts may miss icons.", this);
+        if (hearableMask.value == 0)
+            Debug.LogWarning("Hearable Mask is not set! Sphere cast may miss IObjectsHear objects.", this);
     }
 
     void Update()
@@ -40,7 +44,7 @@ public class ObjectsThrowZone : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // Check if the object is in the throwable layer
-        if (((1 << other.gameObject.layer) & throwableMask) != 0)
+        if (((1 << other.gameObject.layer) & throwableMask))
         {
             Debug.Log($"Throwable object detected: {other.name}");
 
@@ -53,7 +57,7 @@ public class ObjectsThrowZone : MonoBehaviour
                 Quaternion.identity,
                 other.transform);
 
-            // Get the first layer from the LayerMask (assuming single layer)
+            // Get the first layer from the LayerMask
             int iconLayer = Mathf.RoundToInt(Mathf.Log(iconLayerMask.value, 2));
             if (iconLayer >= 0 && iconLayer <= 31)
             {
@@ -125,6 +129,10 @@ public class ObjectsThrowZone : MonoBehaviour
             // Apply force with slight upward component for arc
             rb.AddForce(throwDirection * throwForce + Vector3.up * upwardForce, ForceMode.Impulse);
             Debug.Log($"Threw object {obj.name} with force {throwForce} and upward force {upwardForce}");
+
+            // Add collision handler script
+            var collisionHandler = obj.AddComponent<ThrownObjectCollisionHandler>();
+            collisionHandler.Setup(sphereCastRadius, hearableMask);
         }
     }
 }

@@ -12,7 +12,7 @@ public class ThrowableIcon : MonoBehaviour
         targetObject = target;
         throwZone = zone;
 
-        // Make sprite face camera (optional, for 2D sprites)
+        // Make sprite face camera
         transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
 
         // Ensure collider exists
@@ -20,7 +20,7 @@ public class ThrowableIcon : MonoBehaviour
         {
             Debug.LogWarning($"No Collider found on icon {name}. Adding SphereCollider.", this);
             collider = gameObject.AddComponent<SphereCollider>();
-            (collider as SphereCollider).radius = 0.5f; // Adjust size as needed
+            (collider as SphereCollider).radius = 0.5f;
             collider.isTrigger = true;
         }
         else
