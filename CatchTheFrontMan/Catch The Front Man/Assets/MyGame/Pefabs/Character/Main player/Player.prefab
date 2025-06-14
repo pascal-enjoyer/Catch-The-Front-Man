@@ -806,6 +806,7 @@ Transform:
   m_Children:
   - {fileID: 5752809444262475329}
   - {fileID: 2742174670248383820}
+  - {fileID: 744073684497183100}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6588127721419963575
@@ -837,9 +838,11 @@ MonoBehaviour:
   roomWidth: 6
   interactableLayer:
     serializedVersion: 2
-    m_Bits: 3072
+    m_Bits: 2048
   moveSpeed: 4
   sideSpeed: 10
+  wallMoveSpeed: 2
+  crawlSpeed: 1.5
   targetPosition: {x: 0, y: 0, z: 0}
   animManager: {fileID: 6588127721419963575}
   currentState: 0
@@ -1072,6 +1075,60 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0034403205, y: 0.36186403, z: 0.009478629}
     m_Extent: {x: 0.1489611, y: 0.18925542, z: 0.18540259}
   m_DirtyAABB: 0
+--- !u!1 &3356125659397582875
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 744073684497183100}
+  - component: {fileID: 6395601863613454304}
+  m_Layer: 6
+  m_Name: object thrower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &744073684497183100
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3356125659397582875}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3780322293967029996}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6395601863613454304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3356125659397582875}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a41ece285a3ec54f8f869a4dc55bc50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectsDetectRadius: 2
+  iconPrefab: {fileID: 546642322663031631, guid: 45f99a53e5399024eb5454f00a5caf21, type: 3}
+  throwableMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  throwForce: 100
+  upwardForce: 50
+  iconLayerMask:
+    serializedVersion: 2
+    m_Bits: 8192
 --- !u!1 &3704428772305643970
 GameObject:
   m_ObjectHideFlags: 0

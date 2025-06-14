@@ -91,10 +91,20 @@ public class PlayerController : MonoBehaviour
             if (!isMovingAlongWall)
             {
                 isMovingAlongWall = true;
-                animManager.ChangeAnimation("Wall Move");
+                
             }
             transform.position += Vector3.forward * wallMoveSpeed * Time.deltaTime;
-        }
+            switch (currentState)
+            {
+                case PlayerMovementState.left:
+
+                    animManager.ChangeAnimation("Left wall walk");
+                    break;
+                case PlayerMovementState.right:
+                    animManager.ChangeAnimation("Right wall walk");
+                    break;
+            }
+            }
         else if (isMovingAlongWall)
         {
             isMovingAlongWall = false;
@@ -141,12 +151,12 @@ public class PlayerController : MonoBehaviour
             else if (currentState == PlayerMovementState.left && isLeftHeld)
             {
                 isMovingAlongWall = true;
-                animManager.ChangeAnimation("Wall Move");
+                animManager.ChangeAnimation("Left wall walk");
             }
             else if (currentState == PlayerMovementState.right && isRightHeld)
             {
                 isMovingAlongWall = true;
-                animManager.ChangeAnimation("Wall Move");
+                animManager.ChangeAnimation("Right wall walk");
             }
             else if (currentState == PlayerMovementState.down && shouldStartCrawling && isDownHeld)
             {
@@ -300,7 +310,9 @@ public class PlayerController : MonoBehaviour
         if (isHeld && currentState != PlayerMovementState.left && ShouldSkipUpdate() == false)
         {
             HandleCommonMovement(PlayerMovementState.left, Vector3.left, 90f, true);
+
         }
+
     }
 
     public void OnRightButtonHeld(bool isHeld)
@@ -309,7 +321,9 @@ public class PlayerController : MonoBehaviour
         if (isHeld && currentState != PlayerMovementState.right && ShouldSkipUpdate() == false)
         {
             HandleCommonMovement(PlayerMovementState.right, Vector3.right, -90f, true);
+
         }
+        
     }
 
     public void OnLeftButtonReleased()

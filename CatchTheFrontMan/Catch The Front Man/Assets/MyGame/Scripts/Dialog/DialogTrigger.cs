@@ -1,4 +1,4 @@
-using UnityEditor.SceneManagement;
+
 using UnityEngine;
 
 public class DialogTrigger : MonoBehaviour

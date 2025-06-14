@@ -62,4 +62,5 @@ public class PlayerAnimationManager : MonoBehaviour
         AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
         return state.IsName(animName) && state.normalizedTime < 1f;
     }
+
 }

@@ -1,0 +1,12 @@
+# ninja log v5
+367	1657	7714373269346746	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	ddb852edc71ebf29
+1659	2240	7714373273739832	D:/github/Catch-The-Front-Man/CatchTheFrontMan/Catch The Front Man/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/332575i5/obj/arm64-v8a/libswappywrapper.so	521585b5f75ba259
+135	2619	7714373278840386	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	a1c80fb5f6073917
+31	2630	7714373279126234	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	506ec46be6e56950
+270	2666	7714373279567791	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	4f81315f28d9ffb2
+80	2769	7714373280319941	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	504d9af6d2717e4a
+209	2876	7714373281570641	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	4c77445340b8d04a
+1	3027	7714373283137382	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	aaf303503303f708
+174	3561	7714373288090177	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	574469c73c24c4c5
+56	3750	7714373290191351	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	f7230c5fad7f3ad2
+3750	4059	7714373293290908	D:/github/Catch-The-Front-Man/CatchTheFrontMan/Catch The Front Man/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/332575i5/obj/arm64-v8a/libgame.so	524162f67eb101d6

@@ -9,7 +9,8 @@ public class EndLevelTrigger : MonoBehaviour
         if (other.TryGetComponent<PlayerController>(out PlayerController playerController))
         {
             playerController.isMovementBlocked = true;
-            GameSettings.Instance.OnLevelCompleted();
+            GameSettings.Instance.RestartLevel();
+            //GameSettings.Instance.OnLevelCompleted();
         }
     }
 }
