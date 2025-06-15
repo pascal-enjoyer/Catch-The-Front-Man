@@ -594,6 +594,7 @@ GameObject:
   - component: {fileID: 6120930578289165195}
   - component: {fileID: 6251479715752370320}
   - component: {fileID: 2096002567486530063}
+  - component: {fileID: 5839117616740823152}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -840,6 +841,21 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5839117616740823152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3533184261918191431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8274543505320d24196ca6a6e6086d7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  distractionSpritePrefab: {fileID: 3021461056603170270, guid: b0d9045cad405444aa07487c24edd58e, type: 3}
+  distractionDuration: 5
+  spriteHeightOffset: 2
 --- !u!1 &3541107210138652280
 GameObject:
   m_ObjectHideFlags: 0

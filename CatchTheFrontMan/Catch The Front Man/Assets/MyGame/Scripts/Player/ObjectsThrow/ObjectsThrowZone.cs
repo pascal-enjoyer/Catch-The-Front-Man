@@ -44,7 +44,7 @@ public class ObjectsThrowZone : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // Check if the object is in the throwable layer
-        if (((1 << other.gameObject.layer) & throwableMask))
+        if (((1 << other.gameObject.layer) & throwableMask) != 0)
         {
             Debug.Log($"Throwable object detected: {other.name}");
 
@@ -107,19 +107,14 @@ public class ObjectsThrowZone : MonoBehaviour
                         icon.OnClick();
                     }
                     else
-                    {
                         Debug.Log($"Raycast hit {hit.collider.name} but no ThrowableIcon component found.");
-                    }
                 }
                 else
-                {
                     Debug.Log("Raycast missed any objects.");
-                }
             }
         }
     }
 
-    // Method to throw the object
     public void ThrowObject(GameObject obj)
     {
         if (obj.TryGetComponent<Rigidbody>(out var rb))

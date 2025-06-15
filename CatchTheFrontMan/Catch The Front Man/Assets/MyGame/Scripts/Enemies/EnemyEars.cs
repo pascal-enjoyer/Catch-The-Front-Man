@@ -11,14 +11,14 @@ public interface IObjectsHear
 [RequireComponent(typeof(Enemy), typeof(EnemyPatrol))]
 public class EnemyEars : MonoBehaviour, IObjectsHear
 {
-    [SerializeField] private GameObject distractionSpritePrefab; // UI Canvas prefab with Image
+    [SerializeField] private GameObject distractionSpritePrefab; // UI Canvas prefab with FillableObject
     [SerializeField] private float distractionDuration = 5f; // Time to look at point
     [SerializeField] private float spriteHeightOffset = 2f; // Height above enemy
 
     private Enemy enemy;
     private EnemyPatrol patrol;
     private GameObject spriteInstance;
-    private Image fillImage;
+    private FillableObject fillableObject;
     private float timer;
     private Vector3 distractionPoint;
     private bool isDistracted;
@@ -52,25 +52,20 @@ public class EnemyEars : MonoBehaviour, IObjectsHear
                 transform.position + Vector3.up * spriteHeightOffset,
                 Quaternion.identity,
                 transform);
-            fillImage = spriteInstance.GetComponentInChildren<Image>();
-            if (fillImage != null)
+            fillableObject = spriteInstance.GetComponent<FillableObject>();
+            if (fillableObject != null)
             {
-                fillImage.color = Color.red;
-                fillImage.fillMethod = Image.FillMethod.Vertical;
-                fillImage.fillOrigin = (int)Image.OriginVertical.Top;
-                fillImage.fillAmount = 1f;
+                fillableObject.SetFillColor(Color.red);
+                fillableObject.SetFillMethod(Image.FillMethod.Vertical, Image.OriginVertical.Top);
+                fillableObject.SetFillAmount(1f);
             }
             else
-            {
-                Debug.LogError($"Distraction sprite on {name} missing Image component!");
-            }
+                Debug.LogError($"Distraction sprite on {name} missing FillableObject component!");
         }
         else
-        {
             Debug.LogError($"Distraction Sprite Prefab not assigned on {name}!");
-        }
 
-        Debug.Log($"HearableComponent on {name} distracted to look at {point} for {distractionDuration}s");
+        Debug.Log($"EnemyEars on {name} distracted to look at {point} for {distractionDuration}s");
     }
 
     void Update()
@@ -95,27 +90,21 @@ public class EnemyEars : MonoBehaviour, IObjectsHear
             );
         }
 
-        // Update timer and sprite
+        // Update timer and sprite fill
         timer -= Time.deltaTime;
-        if (fillImage != null)
-        {
-            fillImage.fillAmount = timer / distractionDuration;
-        }
+        if (fillableObject != null)
+            fillableObject.SetFillAmount(timer / distractionDuration);
 
         if (timer <= 0)
-        {
             StopDistraction();
-        }
     }
 
     private void StopDistraction()
     {
         isDistracted = false;
         if (spriteInstance != null)
-        {
             Destroy(spriteInstance);
-        }
-        Debug.Log($"HearableComponent on {name} stopped distraction");
+        Debug.Log($"EnemyEars on {name} stopped distraction");
         Destroy(this); // Remove component after distraction
     }
 }
