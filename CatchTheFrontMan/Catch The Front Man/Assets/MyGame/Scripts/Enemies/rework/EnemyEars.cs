@@ -1,34 +1,31 @@
-using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.UI;
 
-
-// Interface for objects that can hear the thrown object's collision
-public interface IObjectsHear
+[RequireComponent(typeof(Enemy))]
+public class EnemyEars : MonoBehaviour, IEarsComponent, IObjectsHear
 {
-    void WatchPoint(Vector3 point);
-}
-[RequireComponent(typeof(Enemy), typeof(EnemyPatrol))]
-public class EnemyEars : MonoBehaviour, IObjectsHear
-{
-    [SerializeField] private GameObject distractionSpritePrefab; // UI Canvas prefab with FillableObject
-    [SerializeField] private float distractionDuration = 5f; // Time to look at point
-    [SerializeField] private float spriteHeightOffset = 2f; // Height above enemy
+    [SerializeField] private GameObject distractionSpritePrefab;
+    [SerializeField] private float distractionDuration = 5f;
+    [SerializeField] private float spriteHeightOffset = 2f;
+    [SerializeField] private float rotationSpeed = 5f; // Добавляем поле для rotationSpeed
 
     private Enemy enemy;
-    private EnemyPatrol patrol;
     private GameObject spriteInstance;
     private FillableObject fillableObject;
     private float timer;
     private Vector3 distractionPoint;
     private bool isDistracted;
 
-    void Start()
+    public bool IsDistracted(out Vector3 point)
     {
-        enemy = GetComponent<Enemy>();
-        patrol = GetComponent<EnemyPatrol>();
+        point = distractionPoint;
+        return isDistracted && timer > 0;
+    }
 
-        // Validate setup
+    public void Initialize(Enemy enemy)
+    {
+        this.enemy = enemy;
+
         if (distractionSpritePrefab == null)
             Debug.LogError($"Distraction Sprite Prefab not assigned on {name}!", this);
     }
@@ -42,10 +39,17 @@ public class EnemyEars : MonoBehaviour, IObjectsHear
         }
 
         distractionPoint = point;
+        StartDistraction(point);
+    }
+
+    public void StartDistraction(Vector3 point)
+    {
+        if (isDistracted) return;
+
+        distractionPoint = point;
         timer = distractionDuration;
         isDistracted = true;
 
-        // Spawn sprite with Canvas
         if (distractionSpritePrefab != null)
         {
             spriteInstance = Instantiate(distractionSpritePrefab,
@@ -68,7 +72,18 @@ public class EnemyEars : MonoBehaviour, IObjectsHear
         Debug.Log($"EnemyEars on {name} distracted to look at {point} for {distractionDuration}s");
     }
 
-    void Update()
+    public void StopDistraction()
+    {
+        if (!isDistracted) return;
+
+        isDistracted = false;
+        if (spriteInstance != null)
+            Destroy(spriteInstance);
+        Debug.Log($"EnemyEars on {name} stopped distraction");
+        Destroy(this);
+    }
+
+    private void Update()
     {
         if (!isDistracted || enemy.IsDead || !enemy.IsActive)
         {
@@ -77,34 +92,23 @@ public class EnemyEars : MonoBehaviour, IObjectsHear
             return;
         }
 
-        // Make enemy look at distraction point
         Vector3 direction = (distractionPoint - transform.position).normalized;
-        direction.y = 0; // Keep rotation horizontal
+        direction.y = 0;
         if (direction != Vector3.zero)
         {
             Quaternion lookRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 lookRotation,
-                patrol.rotationSpeed * Time.deltaTime
+                rotationSpeed * Time.deltaTime
             );
         }
 
-        // Update timer and sprite fill
         timer -= Time.deltaTime;
         if (fillableObject != null)
             fillableObject.SetFillAmount(timer / distractionDuration);
 
         if (timer <= 0)
             StopDistraction();
-    }
-
-    private void StopDistraction()
-    {
-        isDistracted = false;
-        if (spriteInstance != null)
-            Destroy(spriteInstance);
-        Debug.Log($"EnemyEars on {name} stopped distraction");
-        Destroy(this); // Remove component after distraction
     }
 }

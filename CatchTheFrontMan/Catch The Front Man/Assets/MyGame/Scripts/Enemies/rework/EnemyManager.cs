@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using static EnemyPatrol;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -14,7 +13,7 @@ public class EnemyManager : MonoBehaviour
         public GameObject enemyPrefab;
         public Waypoint[] patrolWaypoints;
         public Transform spawnPoint;
-        public PatrolType patrolType;
+        public EnemyPatrol.PatrolType patrolType;
     }
 
     [Header("Enemy Spawn Settings")]
@@ -38,14 +37,12 @@ public class EnemyManager : MonoBehaviour
             player = newPlayer;
         });
 
-        // Подписываемся на события DeathTimer
         DeathTimer.OnTimerStarted += OnDeathTimerStarted;
         DeathTimer.OnTimerEnded += OnDeathTimerEnded;
     }
 
     private void OnDestroy()
     {
-        // Отписываемся от событий DeathTimer
         DeathTimer.OnTimerStarted -= OnDeathTimerStarted;
         DeathTimer.OnTimerEnded -= OnDeathTimerEnded;
     }
@@ -92,17 +89,18 @@ public class EnemyManager : MonoBehaviour
         return waypoints[0].point.position;
     }
 
-    private void SetupEnemyPatrol(GameObject enemy, Waypoint[] waypoints, PatrolType patrolType)
+    private void SetupEnemyPatrol(GameObject enemy, Waypoint[] waypoints, EnemyPatrol.PatrolType patrolType)
     {
-        EnemyPatrol patrol = enemy.GetComponent<EnemyPatrol>();
+        IPatrolComponent patrol = enemy.GetComponent<IPatrolComponent>();
         if (patrol == null)
         {
             Debug.LogError("Enemy prefab is missing EnemyPatrol component!");
             return;
         }
 
-        patrol.waypoints = waypoints;
-        patrol.patrolType = patrolType;
+        EnemyPatrol patrolComponent = (EnemyPatrol)patrol;
+        patrolComponent.waypoints = waypoints;
+        patrolComponent.patrolType = patrolType;
     }
 
     public void ResetAllEnemies()

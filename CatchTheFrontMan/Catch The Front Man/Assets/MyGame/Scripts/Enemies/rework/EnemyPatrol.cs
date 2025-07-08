@@ -14,14 +14,14 @@ public class Waypoint
     }
 }
 
-public class EnemyPatrol : MonoBehaviour
+public class EnemyPatrol : MonoBehaviour, IPatrolComponent
 {
     public Waypoint[] waypoints;
     public float moveSpeed = 3f;
     public float rotationSpeed = 5f;
     public PatrolType patrolType = PatrolType.PingPong;
     public bool GizmosOn = true;
-    public PlayerAnimationManager animator;
+    [SerializeField] private PlayerAnimationManager animator;
 
     private int currentWaypointIndex = 0;
     private Vector3 targetPosition;
@@ -29,65 +29,94 @@ public class EnemyPatrol : MonoBehaviour
     private float waitTimer = 0f;
     private Quaternion targetRotation;
     private bool isMovingForward = true;
-    private EnemyVision enemyVision;
     private Enemy enemy;
+    private Transform chaseTarget;
+    private bool isPatrolling;
+    private bool isChasing;
+
+    public bool IsPatrolling => isPatrolling;
+    public bool IsChasing => isChasing;
 
     public enum PatrolType { Loop, PingPong }
 
-    void Start()
+    public void Initialize(Enemy enemy)
     {
-        enemyVision = GetComponent<EnemyVision>();
-        enemy = GetComponent<Enemy>();
-        if (waypoints.Length > 0)
+        this.enemy = enemy;
+        if (waypoints.Length > 0 && waypoints[currentWaypointIndex] != null)
         {
-            if (waypoints[currentWaypointIndex] != null)
-            {
-                targetPosition = waypoints[currentWaypointIndex].point.position;
-                transform.position = targetPosition;
-                RotateImmediatelyToTarget();
-            }
-
-            if (waypoints.Length == 1)
-            {
-                StartWaiting();
-                animator.ChangeAnimation("Idle");
-            }
+            targetPosition = waypoints[currentWaypointIndex].point.position;
+            transform.position = targetPosition;
+            RotateImmediatelyToTarget();
         }
     }
 
     private bool IsEnemyAbleToDoSomething()
     {
-        return enemy.IsActive;
+        return enemy.IsActive && !enemy.IsDead;
+    }
+
+    public void StartPatrolling()
+    {
+        if (waypoints.Length == 0) return;
+        isPatrolling = true;
+        isChasing = false;
+        if (waypoints.Length == 1)
+        {
+            StartWaiting();
+            animator.ChangeAnimation("Idle");
+        }
+    }
+
+    public void StopPatrolling()
+    {
+        isPatrolling = false;
+        isWaiting = false;
+        animator.ChangeAnimation("Idle");
+    }
+
+    public void StartChasing(Transform target)
+    {
+        isChasing = true;
+        isPatrolling = false;
+        chaseTarget = target;
+        animator.ChangeAnimation("Walk");
+    }
+
+    public void StopChasing()
+    {
+        isChasing = false;
+        chaseTarget = null;
+        animator.ChangeAnimation("Idle");
     }
 
     void Update()
     {
         if (!IsEnemyAbleToDoSomething()) return;
-        if (enemyVision != null && enemyVision.IsPlayerVisible)
-        {
-            if (isWaiting)
-            {
-                waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
-            }
-            return;
-        }
 
-        if (waypoints.Length == 1)
+        if (isChasing && chaseTarget != null)
         {
-            HandleSingleWaypoint();
-            return;
-        }
-
-        if (waypoints.Length == 0) return;
-
-        if (isWaiting)
-        {
-            HandleWaiting();
-        }
-        else
-        {
+            targetPosition = chaseTarget.position;
             MoveToWaypoint();
             RotateTowardsTarget();
+        }
+        else if (isPatrolling)
+        {
+            if (waypoints.Length == 1)
+            {
+                HandleSingleWaypoint();
+            }
+            else if (waypoints.Length > 1)
+            {
+                if (isWaiting)
+                {
+                    HandleWaiting();
+                }
+                else
+                {
+                    MoveToWaypoint();
+                    RotateTowardsTarget();
+                }
+            }
         }
     }
 
@@ -115,8 +144,7 @@ public class EnemyPatrol : MonoBehaviour
 
     void MoveToWaypoint()
     {
-        if (waypoints.Length <= 1 || currentWaypointIndex >= waypoints.Length)
-            return;
+        if (waypoints.Length <= 1 && !isChasing) return;
 
         transform.position = Vector3.MoveTowards(
             transform.position,
@@ -124,19 +152,19 @@ public class EnemyPatrol : MonoBehaviour
             moveSpeed * Time.deltaTime
         );
 
-        if (enemyVision == null || !enemyVision.IsPlayerVisible)
-            animator.ChangeAnimation("Walk");
-        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+        if (!isChasing)
         {
-            if (waypoints[currentWaypointIndex].GetWaitTime() > 0)
+            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
             {
-                if (enemyVision == null || !enemyVision.IsPlayerVisible)
+                if (waypoints[currentWaypointIndex].GetWaitTime() > 0)
+                {
                     animator.ChangeAnimation("Idle");
-                StartWaiting();
-            }
-            else
-            {
-                SetNextWaypoint();
+                    StartWaiting();
+                }
+                else
+                {
+                    SetNextWaypoint();
+                }
             }
         }
     }
@@ -159,19 +187,6 @@ public class EnemyPatrol : MonoBehaviour
 
     void HandleWaiting()
     {
-        if (enemyVision != null && enemyVision.IsPlayerVisible)
-        {
-            waitTimer = waypoints[currentWaypointIndex].GetWaitTime();
-            return;
-        }
-
-        if (waypoints.Length == 1)
-        {
-            animator.ChangeAnimation("Idle");
-            RotateDuringWait();
-            return;
-        }
-
         waitTimer -= Time.deltaTime;
         RotateDuringWait();
 
@@ -209,8 +224,6 @@ public class EnemyPatrol : MonoBehaviour
 
     void RotateTowardsTarget()
     {
-        if (waypoints.Length == 0) return;
-
         Vector3 direction = (targetPosition - transform.position).normalized;
         if (direction == Vector3.zero) return;
 

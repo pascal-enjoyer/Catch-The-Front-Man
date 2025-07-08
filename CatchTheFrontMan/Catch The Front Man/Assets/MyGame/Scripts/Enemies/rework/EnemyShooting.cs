@@ -1,43 +1,60 @@
 using UnityEngine;
 
-public class EnemyShooting : MonoBehaviour
+public class EnemyShooting : MonoBehaviour, IShootingComponent
 {
     public GameObject bulletPrefab;
-
     public float bulletSpeed = 20f;
     public float fireRate = 1f;
-
-    [Header("Prediction Settings")]
     [SerializeField] private bool debugPrediction = false;
     public float rotationSpeed = 5f;
+    public float shootDelay = 0.3f;
+    public Transform firePoint;
+    [SerializeField] private PlayerAnimationManager animator;
 
+    private bool isAttacking;
     private bool isDelaying = true;
     private float delayTimer = 0f;
     private float fireTimer = 0f;
-    public float shootDelay = 0.3f;
-    public PlayerAnimationManager animator;
+    private Enemy enemy;
+    private IVisionComponent vision;
 
-    public Transform firePoint;
+    public bool IsAttacking => isAttacking;
 
-    private void Start()
+    public void Initialize(Enemy enemy)
     {
-        if (TryGetComponent<EnemyVision>(out EnemyVision enemyVision))
-        {
-            enemyVision.PlayerInViewZone.AddListener(OnPlayerInViewZone);
-            enemyVision.PlayerOutViewZone.AddListener(OnPlayerOutViewZone);
-        }
+        this.enemy = enemy;
+        vision = GetComponent<IVisionComponent>();
     }
 
-    private void OnPlayerInViewZone(bool wasPlayerVisible, GameObject player, Vector3 aimPoint, Vector3 calculatedVelocity)
+    public void StartAttacking()
     {
-        RotateTowardsPlayer(player.transform.position);
-        animator.ChangeAnimation("Firing");
-
-        if (!wasPlayerVisible)
+        if (!IsEnemyAbleToDoSomething()) return;
+        isAttacking = true;
+        if (!isDelaying)
         {
             delayTimer = shootDelay;
             isDelaying = true;
         }
+    }
+
+    public void StopAttacking()
+    {
+        isAttacking = false;
+        isDelaying = true;
+        fireTimer = 0f;
+        animator.ChangeAnimation("Idle");
+    }
+
+    private bool IsEnemyAbleToDoSomething()
+    {
+        return enemy.IsActive && !enemy.IsDead;
+    }
+
+    private void Update()
+    {
+        if (!isAttacking || !IsEnemyAbleToDoSomething() || !vision.IsPlayerVisible) return;
+
+        RotateTowardsPlayer(vision.Player.transform.position);
 
         if (isDelaying)
         {
@@ -53,23 +70,13 @@ public class EnemyShooting : MonoBehaviour
             fireTimer += Time.deltaTime;
             if (fireTimer >= 1f / fireRate)
             {
-                Shoot(player, aimPoint, calculatedVelocity);
+                Shoot(vision.Player);
                 fireTimer = 0f;
             }
         }
     }
 
-    public void OnPlayerOutViewZone(bool wasPlayerVisible)
-    {
-        if (wasPlayerVisible)
-        {
-            animator.ChangeAnimation("Idle");
-        }
-        fireTimer = 0f;
-        isDelaying = true;
-    }
-
-    void RotateTowardsPlayer(Vector3 playerPosition)
+    private void RotateTowardsPlayer(Vector3 playerPosition)
     {
         Vector3 playerCenter = playerPosition;
         Vector3 direction = (playerCenter - transform.position).normalized;
@@ -83,11 +90,11 @@ public class EnemyShooting : MonoBehaviour
         );
     }
 
-
-
-    public void Shoot(GameObject player, Vector3 playerAimPoint, Vector3 calculatedVelocity)
+    private void Shoot(GameObject player)
     {
         PlayerController playerController = player.GetComponent<PlayerController>();
+        Vector3 playerAimPoint = playerController.GetComponent<Collider>().bounds.center;
+        Vector3 calculatedVelocity = (player.transform.position - player.transform.position) / Time.deltaTime; // Simplified
         Vector3 aimPoint = GetPredictedAimPoint(playerAimPoint, playerController, calculatedVelocity);
         Vector3 direction = (aimPoint - firePoint.position).normalized;
 
@@ -96,14 +103,13 @@ public class EnemyShooting : MonoBehaviour
             aimPoint = playerAimPoint;
             direction = (aimPoint - firePoint.position).normalized;
         }
-        // Визуализация
+
         if (debugPrediction)
         {
             Debug.DrawLine(firePoint.position, aimPoint, Color.cyan, 1f);
             Debug.DrawRay(aimPoint, Vector3.up * 2f, Color.red, 1f);
         }
 
-        // Создание пули
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
         Bullet bulletComponent = bullet.GetComponent<Bullet>();
 
@@ -116,36 +122,31 @@ public class EnemyShooting : MonoBehaviour
             Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
             if (bulletRb) bulletRb.linearVelocity = direction * bulletSpeed;
         }
+
         if (debugPrediction)
             Debug.Log($"Bullet speed: {bulletSpeed} | Direction: {direction}");
     }
 
-    private Vector3 GetPredictedAimPoint(Vector3 targetPos, PlayerController _playerController, Vector3 calculatedVelocity)
+    private Vector3 GetPredictedAimPoint(Vector3 targetPos, PlayerController playerController, Vector3 calculatedVelocity)
     {
         Vector3 shooterPos = firePoint.position;
-        Vector3 targetVelocity = GetPredictionVelocity(_playerController, calculatedVelocity);
+        Vector3 targetVelocity = GetPredictionVelocity(playerController, calculatedVelocity);
 
-        // Добавляем логирование для диагностики
         if (debugPrediction)
         {
-            Debug.Log($"PlayerState: {_playerController.currentState}");
+            Debug.Log($"PlayerState: {playerController.currentState}");
             Debug.Log($"Calculated Velocity: {calculatedVelocity}");
             Debug.Log($"Predicted Velocity: {targetVelocity}");
         }
 
-        // Упрощенный физический расчет с приоритетом реальной скорости
         float timeToTarget = Vector3.Distance(shooterPos, targetPos) / bulletSpeed;
         return targetPos + targetVelocity * timeToTarget;
     }
 
-
-
     private Vector3 GetPredictionVelocity(PlayerController playerController, Vector3 calculatedVelocity)
     {
-        // Всегда используем реальную скорость, если игрок движется
         if (!playerController.isStopped) return calculatedVelocity;
 
-        // Только для специальных состояний
         switch (playerController.currentState)
         {
             case PlayerController.PlayerMovementState.left:

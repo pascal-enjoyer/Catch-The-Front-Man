@@ -13,7 +13,7 @@ public class EnemyVisionVizualizer : MonoBehaviour
     private GameObject radiusSpriteObject; // Объект для спрайта радиуса
     private GameObject angleSpriteObject; // Объект для спрайта зоны видимости
     private GameObject visibleSpriteObject; // Объект для спрайта прямой видимости
-    private GameObject player => enemyVision.player; // Получаем игрока из EnemyVision
+    private GameObject player => enemyVision.Player; // Получаем игрока из EnemyVision
     private bool isPlayerInRadius = false; // Флаг нахождения игрока в радиусе
     private bool isPlayerInAngle = false; // Флаг нахождения игрока в угле обзора
     private Camera mainCamera; // Ссылка на основную камеру
@@ -86,7 +86,7 @@ public class EnemyVisionVizualizer : MonoBehaviour
         // Проверяем, находится ли игрок в угле обзора
         Vector3 directionToPlayer = toPlayer.normalized;
         float dotProduct = Vector3.Dot(transform.forward, directionToPlayer);
-        isPlayerInAngle = dotProduct >= Mathf.Cos(enemyVision.viewAngle * 0.5f * Mathf.Deg2Rad) || enemyVision.enemyTouchesPlayer;
+        isPlayerInAngle = dotProduct >= Mathf.Cos(enemyVision.viewAngle * 0.5f * Mathf.Deg2Rad) || enemyVision.EnemyTouchesPlayer;
     }
 
     void UpdateSprites()
