@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using static EnemyPatrol;
 
 public class EnemyManager : MonoBehaviour
 {
@@ -14,7 +13,7 @@ public class EnemyManager : MonoBehaviour
         public GameObject enemyPrefab;
         public Waypoint[] patrolWaypoints;
         public Transform spawnPoint;
-        public PatrolType patrolType;
+        public EnemyMovement.PatrolType patrolType;
     }
 
     [Header("Enemy Spawn Settings")]
@@ -38,14 +37,12 @@ public class EnemyManager : MonoBehaviour
             player = newPlayer;
         });
 
-        // Подписываемся на события DeathTimer
         DeathTimer.OnTimerStarted += OnDeathTimerStarted;
         DeathTimer.OnTimerEnded += OnDeathTimerEnded;
     }
 
     private void OnDestroy()
     {
-        // Отписываемся от событий DeathTimer
         DeathTimer.OnTimerStarted -= OnDeathTimerStarted;
         DeathTimer.OnTimerEnded -= OnDeathTimerEnded;
     }
@@ -76,7 +73,7 @@ public class EnemyManager : MonoBehaviour
                 transform
             );
 
-            SetupEnemyPatrol(enemy, data.patrolWaypoints, data.patrolType);
+            SetupEnemy(enemy, data.patrolWaypoints, data.patrolType);
 
             spawnedEnemies.Add(enemy);
         }
@@ -92,17 +89,17 @@ public class EnemyManager : MonoBehaviour
         return waypoints[0].point.position;
     }
 
-    private void SetupEnemyPatrol(GameObject enemy, Waypoint[] waypoints, PatrolType patrolType)
+    private void SetupEnemy(GameObject enemy, Waypoint[] waypoints, EnemyMovement.PatrolType patrolType)
     {
-        EnemyPatrol patrol = enemy.GetComponent<EnemyPatrol>();
-        if (patrol == null)
+        EnemyMovement movement = enemy.GetComponent<EnemyMovement>();
+        if (movement == null)
         {
-            Debug.LogError("Enemy prefab is missing EnemyPatrol component!");
+            Debug.LogError("Enemy prefab is missing EnemyMovement component!");
             return;
         }
 
-        patrol.waypoints = waypoints;
-        patrol.patrolType = patrolType;
+        movement.waypoints = waypoints;
+        movement.patrolType = patrolType;
     }
 
     public void ResetAllEnemies()

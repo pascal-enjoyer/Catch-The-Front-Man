@@ -2,74 +2,81 @@ using UnityEngine;
 
 public class EnemyShooting : MonoBehaviour
 {
-    public GameObject bulletPrefab;
-
-    public float bulletSpeed = 20f;
-    public float fireRate = 1f;
-
-    [Header("Prediction Settings")]
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private float bulletSpeed = 20f;
+    [SerializeField] private float fireRate = 1f;
+    [SerializeField] private float shootDelay = 0.3f;
+    [SerializeField] private Transform firePoint;
     [SerializeField] private bool debugPrediction = false;
-    public float rotationSpeed = 5f;
+    [SerializeField] private float rotationSpeed = 5f;
+    [SerializeField] private PlayerAnimationManager animator;
 
-    private bool isDelaying = true;
-    private float delayTimer = 0f;
-    private float fireTimer = 0f;
-    public float shootDelay = 0.3f;
-    public PlayerAnimationManager animator;
+    private float _delayTimer = 0f;
+    private float _fireTimer = 0f;
+    private bool _isDelaying = true;
+    private Vector3 _lastPlayerPosition;
+    private Vector3 _calculatedVelocity;
+    private EnemyVision _enemyVision;
+    private Enemy _enemy;
 
-    public Transform firePoint;
+    public GameObject BulletPrefab => bulletPrefab;
+    public float BulletSpeed => bulletSpeed;
+    public float FireRate => fireRate;
+    public float ShootDelay => shootDelay;
+    public Transform FirePoint => firePoint;
+
+    private void Awake()
+    {
+        _enemyVision = GetComponent<EnemyVision>();
+        _enemy = GetComponent<Enemy>();
+    }
 
     private void Start()
     {
-        if (TryGetComponent<EnemyVision>(out EnemyVision enemyVision))
+        if (_enemyVision.player != null)
         {
-            enemyVision.PlayerInViewZone.AddListener(OnPlayerInViewZone);
-            enemyVision.PlayerOutViewZone.AddListener(OnPlayerOutViewZone);
+            _lastPlayerPosition = _enemyVision.player.transform.position;
         }
     }
 
-    private void OnPlayerInViewZone(bool wasPlayerVisible, GameObject player, Vector3 aimPoint, Vector3 calculatedVelocity)
+    public void ResetShooting()
     {
+        _delayTimer = shootDelay;
+        _isDelaying = true;
+        _fireTimer = 0f;
+    }
+
+    public void ShootIfPossible()
+    {
+        if (!_enemy.IsActive || !_enemyVision.IsPlayerVisible) return;
+
+        GameObject player = _enemyVision.player;
+        _calculatedVelocity = (player.transform.position - _lastPlayerPosition) / Time.deltaTime;
+        _lastPlayerPosition = player.transform.position;
+
         RotateTowardsPlayer(player.transform.position);
-        animator.ChangeAnimation("Firing");
 
-        if (!wasPlayerVisible)
+        if (_isDelaying)
         {
-            delayTimer = shootDelay;
-            isDelaying = true;
-        }
-
-        if (isDelaying)
-        {
-            delayTimer -= Time.deltaTime;
-            if (delayTimer <= 0)
+            _delayTimer -= Time.deltaTime;
+            if (_delayTimer <= 0)
             {
-                isDelaying = false;
-                fireTimer = 1f / fireRate;
+                _isDelaying = false;
+                _fireTimer = 1f / fireRate;
             }
         }
         else
         {
-            fireTimer += Time.deltaTime;
-            if (fireTimer >= 1f / fireRate)
+            _fireTimer += Time.deltaTime;
+            if (_fireTimer >= 1f / fireRate)
             {
-                Shoot(player, aimPoint, calculatedVelocity);
-                fireTimer = 0f;
+                Shoot(player);
+                _fireTimer = 0f;
             }
         }
     }
 
-    public void OnPlayerOutViewZone(bool wasPlayerVisible)
-    {
-        if (wasPlayerVisible)
-        {
-            animator.ChangeAnimation("Idle");
-        }
-        fireTimer = 0f;
-        isDelaying = true;
-    }
-
-    void RotateTowardsPlayer(Vector3 playerPosition)
+    private void RotateTowardsPlayer(Vector3 playerPosition)
     {
         Vector3 playerCenter = playerPosition;
         Vector3 direction = (playerCenter - transform.position).normalized;
@@ -83,27 +90,24 @@ public class EnemyShooting : MonoBehaviour
         );
     }
 
-
-
-    public void Shoot(GameObject player, Vector3 playerAimPoint, Vector3 calculatedVelocity)
+    private void Shoot(GameObject player)
     {
         PlayerController playerController = player.GetComponent<PlayerController>();
-        Vector3 aimPoint = GetPredictedAimPoint(playerAimPoint, playerController, calculatedVelocity);
+        Vector3 aimPoint = GetPredictedAimPoint(playerController);
         Vector3 direction = (aimPoint - firePoint.position).normalized;
 
         if (playerController.currentState != PlayerController.PlayerMovementState.center)
         {
-            aimPoint = playerAimPoint;
+            aimPoint = player.GetComponent<Collider>().bounds.center;
             direction = (aimPoint - firePoint.position).normalized;
         }
-        // Визуализация
+
         if (debugPrediction)
         {
             Debug.DrawLine(firePoint.position, aimPoint, Color.cyan, 1f);
             Debug.DrawRay(aimPoint, Vector3.up * 2f, Color.red, 1f);
         }
 
-        // Создание пули
         GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(direction));
         Bullet bulletComponent = bullet.GetComponent<Bullet>();
 
@@ -116,46 +120,30 @@ public class EnemyShooting : MonoBehaviour
             Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
             if (bulletRb) bulletRb.linearVelocity = direction * bulletSpeed;
         }
-        if (debugPrediction)
-            Debug.Log($"Bullet speed: {bulletSpeed} | Direction: {direction}");
     }
 
-    private Vector3 GetPredictedAimPoint(Vector3 targetPos, PlayerController _playerController, Vector3 calculatedVelocity)
+    private Vector3 GetPredictedAimPoint(PlayerController playerController)
     {
-        Vector3 shooterPos = firePoint.position;
-        Vector3 targetVelocity = GetPredictionVelocity(_playerController, calculatedVelocity);
+        Vector3 targetPos = playerController.GetComponent<Collider>().bounds.center;
+        Vector3 targetVelocity = _calculatedVelocity;
 
-        // Добавляем логирование для диагностики
-        if (debugPrediction)
+        if (!playerController.isStopped)
         {
-            Debug.Log($"PlayerState: {_playerController.currentState}");
-            Debug.Log($"Calculated Velocity: {calculatedVelocity}");
-            Debug.Log($"Predicted Velocity: {targetVelocity}");
+            switch (playerController.currentState)
+            {
+                case PlayerController.PlayerMovementState.left:
+                    targetVelocity = Vector3.left * playerController.moveSpeed;
+                    break;
+                case PlayerController.PlayerMovementState.right:
+                    targetVelocity = Vector3.right * playerController.moveSpeed;
+                    break;
+                case PlayerController.PlayerMovementState.down:
+                    targetVelocity = Vector3.back * playerController.moveSpeed;
+                    break;
+            }
         }
 
-        // Упрощенный физический расчет с приоритетом реальной скорости
-        float timeToTarget = Vector3.Distance(shooterPos, targetPos) / bulletSpeed;
+        float timeToTarget = Vector3.Distance(firePoint.position, targetPos) / bulletSpeed;
         return targetPos + targetVelocity * timeToTarget;
-    }
-
-
-
-    private Vector3 GetPredictionVelocity(PlayerController playerController, Vector3 calculatedVelocity)
-    {
-        // Всегда используем реальную скорость, если игрок движется
-        if (!playerController.isStopped) return calculatedVelocity;
-
-        // Только для специальных состояний
-        switch (playerController.currentState)
-        {
-            case PlayerController.PlayerMovementState.left:
-                return Vector3.left * playerController.moveSpeed;
-            case PlayerController.PlayerMovementState.right:
-                return Vector3.right * playerController.moveSpeed;
-            case PlayerController.PlayerMovementState.down:
-                return Vector3.back * playerController.moveSpeed;
-            default:
-                return calculatedVelocity;
-        }
     }
 }

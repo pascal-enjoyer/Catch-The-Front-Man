@@ -584,7 +584,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4741109615768398390}
-  - component: {fileID: 849143781740141996}
   - component: {fileID: 3154842630503385048}
   - component: {fileID: 6809082901477796081}
   - component: {fileID: 5334462512189486103}
@@ -594,7 +593,8 @@ GameObject:
   - component: {fileID: 6120930578289165195}
   - component: {fileID: 6251479715752370320}
   - component: {fileID: 2096002567486530063}
-  - component: {fileID: 5839117616740823152}
+  - component: {fileID: 972810182348777023}
+  - component: {fileID: 2273268575085464680}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -619,24 +619,6 @@ Transform:
   - {fileID: 4241184213773431008}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &849143781740141996
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3533184261918191431}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6fe8f3f9c18d7bf4e836fce60c36a654, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waypoints: []
-  moveSpeed: 5
-  rotationSpeed: 5
-  patrolType: 1
-  GizmosOn: 1
-  animator: {fileID: 6998181350127327876}
 --- !u!114 &3154842630503385048
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -652,11 +634,11 @@ MonoBehaviour:
   bulletPrefab: {fileID: 2731069355283091526, guid: 2e86e7570765cbc41b2978449223acf5, type: 3}
   bulletSpeed: 20
   fireRate: 3
+  shootDelay: 0.1
+  firePoint: {fileID: 6337305069465327239}
   debugPrediction: 0
   rotationSpeed: 5
-  shootDelay: 0.1
   animator: {fileID: 6998181350127327876}
-  firePoint: {fileID: 6337305069465327239}
 --- !u!114 &6809082901477796081
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -841,7 +823,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &5839117616740823152
+--- !u!114 &972810182348777023
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -850,12 +832,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 3533184261918191431}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8274543505320d24196ca6a6e6086d7f, type: 3}
+  m_Script: {fileID: 11500000, guid: 7668c968987c99a438ab01433b810584, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distractionSpritePrefab: {fileID: 3021461056603170270, guid: b0d9045cad405444aa07487c24edd58e, type: 3}
-  distractionDuration: 5
-  spriteHeightOffset: 2
+--- !u!114 &2273268575085464680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3533184261918191431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd3625c0731cf4b4b94cea1f42e25184, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waypoints: []
+  moveSpeed: 3
+  rotationSpeed: 5
+  gizmosOn: 1
+  animator: {fileID: 6998181350127327876}
+  patrolType: 0
 --- !u!1 &3541107210138652280
 GameObject:
   m_ObjectHideFlags: 0

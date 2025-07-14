@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[System.Serializable]
+/*[System.Serializable]
 public class Waypoint
 {
     public Transform point;
@@ -13,10 +13,10 @@ public class Waypoint
         return Random.Range(minWaitTime, maxWaitTime);
     }
 }
-
+*/
 public class EnemyPatrol : MonoBehaviour
 {
-    public Waypoint[] waypoints;
+ /*   public Waypoint[] waypoints;
     public float moveSpeed = 3f;
     public float rotationSpeed = 5f;
     public PatrolType patrolType = PatrolType.PingPong;
@@ -245,5 +245,5 @@ public class EnemyPatrol : MonoBehaviour
                     Gizmos.DrawLine(waypoints[i].point.position, waypoints[i + 1].point.position);
             }
         }
-    }
+    }*/
 }

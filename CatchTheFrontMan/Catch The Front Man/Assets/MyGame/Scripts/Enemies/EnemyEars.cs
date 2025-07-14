@@ -86,7 +86,8 @@ public class EnemyEars : MonoBehaviour, IObjectsHear
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 lookRotation,
-                patrol.rotationSpeed * Time.deltaTime
+                //patrol.rotationSpeed
+                1 * Time.deltaTime
             );
         }
 
