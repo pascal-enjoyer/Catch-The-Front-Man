@@ -46,4 +46,19 @@ public class EnemyStateMachine : MonoBehaviour
         _currentState = newState;
         _currentState?.Enter(this);
     }
+
+    public void WatchPoint(Vector3 point)
+    {
+        if (_enemy.IsDead || !_enemy.IsActive)
+        {
+            Debug.Log($"Enemy {name} cannot be distracted: IsDead={_enemy.IsDead}, IsActive={_enemy.IsActive}");
+            return;
+        }
+
+        // ѕереходим в DistractedState только если не в ChaseState
+        if (!(_currentState is ChaseState))
+        {
+            TransitionToState(new DistractedState(point));
+        }
+    }
 }

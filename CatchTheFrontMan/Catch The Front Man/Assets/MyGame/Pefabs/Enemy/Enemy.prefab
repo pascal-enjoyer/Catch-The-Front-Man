@@ -595,6 +595,8 @@ GameObject:
   - component: {fileID: 2096002567486530063}
   - component: {fileID: 972810182348777023}
   - component: {fileID: 2273268575085464680}
+  - component: {fileID: 3328496457009823811}
+  - component: {fileID: 7037715340461900541}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -658,7 +660,7 @@ MonoBehaviour:
     m_Bits: 64
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 3127
+    m_Bits: 19511
   visionPoint: {fileID: 4241184213773431008}
   GizmosOn: 1
   animator: {fileID: 6998181350127327876}
@@ -853,6 +855,33 @@ MonoBehaviour:
   gizmosOn: 1
   animator: {fileID: 6998181350127327876}
   patrolType: 0
+--- !u!114 &3328496457009823811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3533184261918191431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fe8f3f9c18d7bf4e836fce60c36a654, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7037715340461900541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3533184261918191431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8274543505320d24196ca6a6e6086d7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  distractionSpritePrefab: {fileID: 3021461056603170270, guid: b0d9045cad405444aa07487c24edd58e, type: 3}
+  distractionDuration: 5
+  spriteHeightOffset: 2
 --- !u!1 &3541107210138652280
 GameObject:
   m_ObjectHideFlags: 0

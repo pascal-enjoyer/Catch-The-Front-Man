@@ -1120,19 +1120,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectsDetectRadius: 3
-  iconPrefab: {fileID: 546642322663031631, guid: 45f99a53e5399024eb5454f00a5caf21, type: 3}
   throwableMask:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 17408
   throwForce: 100
   upwardForce: 50
-  iconLayerMask:
-    serializedVersion: 2
-    m_Bits: 8192
-  sphereCastRadius: 2
+  sphereCastRadius: 5
   hearableMask:
     serializedVersion: 2
     m_Bits: 1
+  thrownObjectNewMask: Outline
 --- !u!1 &3704428772305643970
 GameObject:
   m_ObjectHideFlags: 0

@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         if (ShouldSkipUpdate()) return;
-
+        CanMoveForward();
         if (!isStopped)
         {
             HandleForwardMovement();
@@ -91,20 +91,19 @@ public class PlayerController : MonoBehaviour
             if (!isMovingAlongWall)
             {
                 isMovingAlongWall = true;
-                
+
             }
             transform.position += Vector3.forward * wallMoveSpeed * Time.deltaTime;
             switch (currentState)
             {
                 case PlayerMovementState.left:
-
                     animManager.ChangeAnimation("Left wall walk");
                     break;
                 case PlayerMovementState.right:
                     animManager.ChangeAnimation("Right wall walk");
                     break;
             }
-            }
+        }
         else if (isMovingAlongWall)
         {
             isMovingAlongWall = false;
@@ -123,17 +122,28 @@ public class PlayerController : MonoBehaviour
 
     private bool ShouldSkipUpdate()
     {
+        if (isStunned) Debug.Log(isStunned + " should");
         return isMovementBlocked || isStunned || isDead || DeathTimer.IsTimerActive;
     }
 
     private void HandleForwardMovement()
     {
-        animManager.ChangeAnimation("Crouch Walk");
-        transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+        if (CanMoveForward())
+        {
+            animManager.ChangeAnimation("Crouch Walk");
+            transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+        }
+        else
+        {
+            // Stop forward movement and play idle or appropriate animation
+            animManager.ChangeAnimation("idle");
+            isStopped = true; // Optionally set isStopped to true to halt movement
+        }
     }
 
     private void HandleSideMovement()
     {
+        if (!CanMoveForward()) return;
         transform.position = Vector3.MoveTowards(
             transform.position,
             new Vector3(targetPosition.x, transform.position.y, targetPosition.z),
@@ -169,9 +179,12 @@ public class PlayerController : MonoBehaviour
 
     public void TriggerKillStun()
     {
-        if (!CanBeAffectedByEnemy()) return;
+        if (!CanBeAffectedByEnemy()) { return; }
         if (!isStunned)
+        {
+            Debug.Log(isStunned + " trig");
             StartCoroutine(KillStunRoutine());
+        }
     }
 
     private IEnumerator KillStunRoutine()
@@ -198,8 +211,9 @@ public class PlayerController : MonoBehaviour
 
     public void OnDownButtonClicked()
     {
-        if (!isDownHeld && ShouldSkipUpdate() == false)
+        if (!isDownHeld && !ShouldSkipUpdate())
         {
+            Debug.Log(isStunned + " OnDownButtonClicked");
             SetProneState();
         }
     }
@@ -232,7 +246,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleCommonMovement(PlayerMovementState newState, Vector3 direction, float yRotation, bool isHold = false)
     {
-        if (ShouldSkipUpdate()) return;
+        if (ShouldSkipUpdate() || !CanMoveForward()) return;
 
         if (antiPairs.ContainsKey(newState) && currentState == antiPairs[newState])
         {
@@ -290,7 +304,8 @@ public class PlayerController : MonoBehaviour
 
     public void OnLeftButtonClicked()
     {
-        if (!isLeftHeld && !ignoreClicksAfterHold && !isMoving && pendingState != PlayerMovementState.center && ShouldSkipUpdate() == false)
+        if (ShouldSkipUpdate()) return;
+        if (!isLeftHeld && !ignoreClicksAfterHold && !isMoving && pendingState != PlayerMovementState.center)
         {
             HandleCommonMovement(PlayerMovementState.left, Vector3.left, 90f);
         }
@@ -298,7 +313,8 @@ public class PlayerController : MonoBehaviour
 
     public void OnRightButtonClicked()
     {
-        if (!isRightHeld && !ignoreClicksAfterHold && !isMoving && pendingState != PlayerMovementState.center && ShouldSkipUpdate() == false)
+        if (ShouldSkipUpdate()) return;
+        if (!isRightHeld && !ignoreClicksAfterHold && !isMoving && pendingState != PlayerMovementState.center)
         {
             HandleCommonMovement(PlayerMovementState.right, Vector3.right, -90f);
         }
@@ -306,24 +322,22 @@ public class PlayerController : MonoBehaviour
 
     public void OnLeftButtonHeld(bool isHeld)
     {
+        if (ShouldSkipUpdate()) return;
         isLeftHeld = isHeld;
-        if (isHeld && currentState != PlayerMovementState.left && ShouldSkipUpdate() == false)
+        if (isHeld && currentState != PlayerMovementState.left)
         {
             HandleCommonMovement(PlayerMovementState.left, Vector3.left, 90f, true);
-
         }
-
     }
 
     public void OnRightButtonHeld(bool isHeld)
     {
+        if (ShouldSkipUpdate()) return;
         isRightHeld = isHeld;
-        if (isHeld && currentState != PlayerMovementState.right && ShouldSkipUpdate() == false)
+        if (isHeld && currentState != PlayerMovementState.right)
         {
             HandleCommonMovement(PlayerMovementState.right, Vector3.right, -90f, true);
-
         }
-        
     }
 
     public void OnLeftButtonReleased()
@@ -346,13 +360,14 @@ public class PlayerController : MonoBehaviour
 
     public void OnDownButtonHeld(bool isHeld)
     {
+        if (ShouldSkipUpdate()) return;
         isDownHeld = isHeld;
         if (isHeld && currentState != PlayerMovementState.down && ShouldSkipUpdate() == false)
         {
             shouldStartCrawling = true;
             SetProneState();
         }
-        else if (currentState == PlayerMovementState.down && !isMoving)
+        else if (currentState == PlayerMovementState.down && !isMoving && ShouldSkipUpdate() == false)
         {
             isCrawling = isHeld;
             animManager.ChangeAnimation(isHeld ? "Crawl" : "Floor Lie");
@@ -469,6 +484,25 @@ public class PlayerController : MonoBehaviour
     private void OnDialogEnded()
     {
         // Movement will be restored in CameraMovement after camera returns
+    }
+
+    private bool CanMoveForward()
+    {
+        RaycastHit hit;
+        var origin = transform.position + raycastYOffset; // Use existing raycastYOffset for consistency
+        float forwardCheckDistance = 1f; // Adjust this distance based on your needs
+
+        // Visualize the raycast with a straight line
+        Debug.DrawLine(origin, origin + Vector3.forward * forwardCheckDistance, Color.red, 0.1f);
+
+        // Cast a ray forward to check for obstacles
+        if (Physics.Raycast(origin, Vector3.forward, out hit, forwardCheckDistance, interactableLayer))
+        {
+            Debug.Log("gavnooo");
+            // Obstacle detected, stop forward movement
+            return false;
+        }
+        return true; // No obstacle, can move forward
     }
 
     public void RestoreStateAfterDialog()
